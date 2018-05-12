@@ -1,0 +1,10 @@
+{
+  "name": "video-game",
+  "version": "1.0.0",
+  "repository": "https://github.com/onefrankguy/video-game",
+  "license": "MIT",
+  "scripts": {
+  },
+  "devDependencies": {
+  }
+}
