@@ -1,2 +1,6 @@
 .DS_Store
+yarn.lock
+*.log
 morgue/
+public/
+node_modules/

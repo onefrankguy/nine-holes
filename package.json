@@ -4,7 +4,11 @@
   "repository": "https://github.com/onefrankguy/video-game",
   "license": "MIT",
   "scripts": {
+    "prebuild": "rm -rf public/* && npm run build:html",
+    "build": "",
+    "build:html": "mkdir -p public && html-minifier --html5 --collapse-whitespace -o public/index.html index.html"
   },
   "devDependencies": {
+    "html-minifier": "3.5.15"
   }
 }
