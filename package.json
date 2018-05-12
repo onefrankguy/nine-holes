@@ -4,15 +4,16 @@
   "repository": "https://github.com/onefrankguy/video-game",
   "license": "MIT",
   "scripts": {
-    "prebuild": "rm -rf public/* && npm run build:html",
-    "build": "",
+    "build": "rm -rf public/* && npm run build:html && npm run build:js",
     "build:html": "mkdir -p public && html-minifier --html5 --collapse-whitespace -o public/index.html index.html",
+    "build:js": "mkdir -p public && uglifyjs js/*.js -m -c -o public/game.js",
     "lint": "eslint js/*.js"
   },
   "devDependencies": {
     "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-plugin-import": "2.11.0",
-    "html-minifier": "3.5.15"
+    "html-minifier": "3.5.15",
+    "uglify-es": "3.3.9"
   }
 }
