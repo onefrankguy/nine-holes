@@ -87,7 +87,7 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPlay</span>(<span class="hljs-params">position</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-string">''</span> === layout[position] &amp;&amp; <span class="hljs-string">'p'</span> !== layout[position][<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">return</span> <span class="hljs-string">''</span> === layout[position] &amp;&amp; <span class="hljs-string">'p'</span> !== position.slice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">valid</span>(<span class="hljs-params">start, end</span>) </span>{
@@ -179,14 +179,18 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">const</span> layout = Board.get();
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span>+id);
       <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === layout[id]) {
-        $(<span class="hljs-string">'#'</span>+id).remove(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
+        element.add(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'p'</span> === id.slice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)) {
+          element.remove(<span class="hljs-string">'hole'</span>);
+        }
       }
       <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === layout[id]) {
-        $(<span class="hljs-string">'#'</span>+id).add(<span class="hljs-string">'white'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'black'</span>);
+        element.add(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>).remove(<span class="hljs-string">'hole'</span>);
       }
       <span class="hljs-keyword">if</span> (<span class="hljs-string">'black'</span> === layout[id]) {
-        $(<span class="hljs-string">'#'</span>+id).add(<span class="hljs-string">'black'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'white'</span>);
+        element.add(<span class="hljs-string">'black'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'hole'</span>);
       }
     });
   }

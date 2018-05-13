@@ -56,7 +56,7 @@ const Board = (function board() {
   }
 
   function canPlay(position) {
-    return '' === layout[position] && 'p' !== layout[position][0];
+    return '' === layout[position] && 'p' !== position.slice(0, 1);
   }
 
   function valid(start, end) {
@@ -148,14 +148,18 @@ const Renderer = (function renderer() {
     const layout = Board.get();
 
     Object.keys(layout).forEach((id) => {
+      const element = $('#'+id);
       if ('' === layout[id]) {
-        $('#'+id).remove('piece').remove('white').remove('black');
+        element.add('hole').remove('white').remove('black');
+        if ('p' === id.slice(0, 1)) {
+          element.remove('hole');
+        }
       }
       if ('white' === layout[id]) {
-        $('#'+id).add('white').add('piece').remove('black');
+        element.add('white').remove('black').remove('hole');
       }
       if ('black' === layout[id]) {
-        $('#'+id).add('black').add('piece').remove('white');
+        element.add('black').remove('white').remove('hole');
       }
     });
   }
