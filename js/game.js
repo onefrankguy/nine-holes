@@ -186,7 +186,64 @@ const Rules = (function rules() {
   }
 
   return {
+    moves,
     winning,
+  }
+}());
+
+const AI = (function ai() {
+  function players(board) {
+    const results = new Set(Object.values(board.layout));
+    results.delete('');
+    return results;
+  }
+
+  function difference(a, b) {
+    const result = new Set(a);
+    b.forEach((item) => {
+      result.delete(item);
+    });
+    return result;
+  }
+
+  function move(player, board) {
+    // Figure out who we're playing against.
+    const player1 = player;
+    const player2 = [...difference(players(board), [player])][0];
+
+    // Figure out what moves we can play.
+    const p1moves = Rules.moves(player1, board);
+
+    // Play a winning move if we have one.
+    const p1wins = Rules.winning(player1, board);
+    if (p1wins.length > 0) {
+      return PRNG.pick(p1wins);
+    }
+
+    // Play a blocking move if we have one.
+    const p2wins = Rules.winning(player2, board);
+    if (p2wins.length > 0) {
+      const p1blocks = [];
+
+      p2wins.forEach((p2move) => {
+        p1moves.forEach((p1move) => {
+          if (p2move[1] === p1move[1]) {
+            p1blocks.push(p1move);
+          }
+        });
+      });
+
+      if (p1blocks.length > 0) {
+        return PRNG.pick(p1blocks);
+      }
+    }
+
+    // Play a random move.
+    return PRNG.pick(p1moves);
+  }
+
+  return {
+    move,
   }
 }());
 
@@ -222,8 +279,7 @@ const Stage = (function stage() {
     Board.move(picked, message);
     picked = undefined;
 
-    console.log(Rules.winning('white', { rows: 3, cols: 3, layout: Board.get() }));
-    console.log(Rules.winning('black', { rows: 3, cols: 3, layout: Board.get() }));
+    console.log(AI.move('black', { rows: 3, cols: 3, layout: Board.get() }));
   }
 
   return {

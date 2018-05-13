@@ -217,7 +217,85 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-keyword">return</span> {
+    moves,
     winning,
+  }
+}());
+
+<span class="hljs-keyword">const</span> AI = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ai</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">players</span>(<span class="hljs-params">board</span>) </span>{
+    <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(<span class="hljs-built_in">Object</span>.values(board.layout));
+    results.delete(<span class="hljs-string">''</span>);
+    <span class="hljs-keyword">return</span> results;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">difference</span>(<span class="hljs-params">a, b</span>) </span>{
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(a);
+    b.forEach(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> {
+      result.delete(item);
+    });
+    <span class="hljs-keyword">return</span> result;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">move</span>(<span class="hljs-params">player, board</span>) </span>{</pre></div>
+        
+      
+        
+        <p>Figure out who we’re playing against.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> player1 = player;
+    <span class="hljs-keyword">const</span> player2 = [...difference(players(board), [player])][<span class="hljs-number">0</span>];</pre></div>
+        
+      
+        
+        <p>Figure out what moves we can play.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> p1moves = Rules.moves(player1, board);</pre></div>
+        
+      
+        
+        <p>Play a winning move if we have one.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> p1wins = Rules.winning(player1, board);
+    <span class="hljs-keyword">if</span> (p1wins.length &gt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">return</span> PRNG.pick(p1wins);
+    }</pre></div>
+        
+      
+        
+        <p>Play a blocking move if we have one.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> p2wins = Rules.winning(player2, board);
+    <span class="hljs-keyword">if</span> (p2wins.length &gt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">const</span> p1blocks = [];
+
+      p2wins.forEach(<span class="hljs-function">(<span class="hljs-params">p2move</span>) =&gt;</span> {
+        p1moves.forEach(<span class="hljs-function">(<span class="hljs-params">p1move</span>) =&gt;</span> {
+          <span class="hljs-keyword">if</span> (p2move[<span class="hljs-number">1</span>] === p1move[<span class="hljs-number">1</span>]) {
+            p1blocks.push(p1move);
+          }
+        });
+      });
+
+      <span class="hljs-keyword">if</span> (p1blocks.length &gt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span> PRNG.pick(p1blocks);
+      }
+    }</pre></div>
+        
+      
+        
+        <p>Play a random move.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">return</span> PRNG.pick(p1moves);
+  }
+
+  <span class="hljs-keyword">return</span> {
+    move,
   }
 }());
 
@@ -253,8 +331,7 @@ avoid a non-uniform distribution of random numbers.</p>
     Board.move(picked, message);
     picked = <span class="hljs-literal">undefined</span>;
 
-    <span class="hljs-built_in">console</span>.log(Rules.winning(<span class="hljs-string">'white'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() }));
-    <span class="hljs-built_in">console</span>.log(Rules.winning(<span class="hljs-string">'black'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() }));
+    <span class="hljs-built_in">console</span>.log(AI.move(<span class="hljs-string">'black'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() }));
   }
 
   <span class="hljs-keyword">return</span> {
