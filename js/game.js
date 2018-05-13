@@ -124,7 +124,7 @@ const Rules = (function rules() {
       cols.push('' + (i + 1));
     }
 
-    let result = undefined;
+    let result;
 
     rows.forEach((row) => {
       if (!result) {
@@ -135,7 +135,7 @@ const Rules = (function rules() {
         });
 
         if (new Set(players).size === 1 && players[0] !== '') {
-          result = players[0];
+          [result] = players;
         }
       }
     });
@@ -149,7 +149,7 @@ const Rules = (function rules() {
         });
 
         if (new Set(players).size === 1 && players[0] !== '') {
-          result = players[0];
+          [result] = players;
         }
       }
     });
@@ -238,7 +238,7 @@ const AI = (function ai() {
 }());
 
 const Stage = (function stage() {
-  let picked = undefined;
+  let picked;
 
   function get() {
     return picked;
@@ -298,7 +298,7 @@ const Renderer = (function renderer() {
 
   function renderBoard() {
     const $ = window.jQuery;
-    const layout = Board.get().layout;
+    const { layout } = Board.get();
 
     Object.keys(layout).forEach((id) => {
       const element = $('#' + id);
@@ -316,7 +316,7 @@ const Renderer = (function renderer() {
 
   function renderPicked() {
     const $ = window.jQuery;
-    const layout = Board.get().layout;
+    const { layout } = Board.get();
     const picked = Stage.get();
 
     Object.keys(layout).forEach((id) => {

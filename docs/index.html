@@ -161,7 +161,7 @@ avoid a non-uniform distribution of random numbers.</p>
       cols.push(<span class="hljs-string">''</span> + (i + <span class="hljs-number">1</span>));
     }
 
-    <span class="hljs-keyword">let</span> result = <span class="hljs-literal">undefined</span>;
+    <span class="hljs-keyword">let</span> result;
 
     rows.forEach(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> {
       <span class="hljs-keyword">if</span> (!result) {
@@ -172,7 +172,7 @@ avoid a non-uniform distribution of random numbers.</p>
         });
 
         <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
-          result = players[<span class="hljs-number">0</span>];
+          [result] = players;
         }
       }
     });
@@ -186,7 +186,7 @@ avoid a non-uniform distribution of random numbers.</p>
         });
 
         <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
-          result = players[<span class="hljs-number">0</span>];
+          [result] = players;
         }
       }
     });
@@ -296,7 +296,7 @@ avoid a non-uniform distribution of random numbers.</p>
 }());
 
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">let</span> picked = <span class="hljs-literal">undefined</span>;
+  <span class="hljs-keyword">let</span> picked;
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">return</span> picked;
@@ -356,7 +356,7 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderBoard</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
-    <span class="hljs-keyword">const</span> layout = Board.get().layout;
+    <span class="hljs-keyword">const</span> { layout } = Board.get();
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
       <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span> + id);
@@ -374,7 +374,7 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderPicked</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
-    <span class="hljs-keyword">const</span> layout = Board.get().layout;
+    <span class="hljs-keyword">const</span> { layout } = Board.get();
     <span class="hljs-keyword">const</span> picked = Stage.get();
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {

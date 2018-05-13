@@ -10,7 +10,7 @@
     "build:html": "mkdir -p public && html-minifier --html5 --collapse-whitespace -o public/index.html index.html",
     "build:js": "mkdir -p public && uglifyjs js/*.js -m -c -o public/game.js",
     "docs": "rm -rf docs/* && docco -l linear js/*.js && mv docs/game.html docs/index.html",
-    "lint": "eslint js/*.js",
+    "lint": "eslint js/*.js 2>&1",
     "postbuild:js": "npm run docs",
     "scss": "node-sass --output-style compressed --omit-source-map-url -o public scss",
     "sync": "cd public && rsync -avz --delete --files-from=../manifest.txt ./ frankmitchell.org:/home/public/nine-holes/",
