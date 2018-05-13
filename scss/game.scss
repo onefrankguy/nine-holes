@@ -1,5 +1,6 @@
 /* RESET */
 $font-size: 1.6rem;
+$line-height: 1.8rem;
 
 * {
   cursor: default;
@@ -9,7 +10,8 @@ $font-size: 1.6rem;
 }
 
 html {
-  font-family: sans-serif;
+  font-family: Helvetica,Arial,sans-serif;
+  font-weight: normal;
   font-size: 62.5%;
 }
 
@@ -50,7 +52,8 @@ a, a:visited {
 }
 
 .table {
-  height: 37.2rem;
+  /* height: 37.2rem; */
+  justify-content: space-evenly;
 }
 
 /* BOARD */
@@ -95,4 +98,20 @@ $hole-size: ($font-size * 4);
 .reset:after {
   content: '\021bb';
   font-size: ($font-size * 2);
+}
+
+/* NOTES */
+.note {
+  font-size: $font-size;
+  line-height: $line-height;
+  margin: $font-size;
+}
+
+.note > h3 {
+  font-size: $font-size;
+  margin-bottom: ($font-size / 2);
+}
+
+.note > ol {
+  list-style-position: inside;
 }
