@@ -235,6 +235,7 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-keyword">return</span> {
     moves,
+    winner,
     winning,
   }
 }());
@@ -330,6 +331,10 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">message</span>) </span>{
+    <span class="hljs-keyword">if</span> (Rules.winner({ <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() })) {
+      <span class="hljs-keyword">return</span>;
+    }
+
     <span class="hljs-keyword">if</span> (!picked) {
       picked = message;
       <span class="hljs-keyword">return</span>;
@@ -348,7 +353,14 @@ avoid a non-uniform distribution of random numbers.</p>
     Board.move(picked, message);
     picked = <span class="hljs-literal">undefined</span>;
 
-    <span class="hljs-built_in">console</span>.log(AI.move(<span class="hljs-string">'black'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() }));
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === Rules.winner({ <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() })) {
+      <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-keyword">const</span> move = AI.move(<span class="hljs-string">'black'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() });
+    <span class="hljs-keyword">if</span> (move &amp;&amp; Board.valid(move[<span class="hljs-number">0</span>], move[<span class="hljs-number">1</span>])) {
+      Board.move(move[<span class="hljs-number">0</span>], move[<span class="hljs-number">1</span>]);
+    }
   }
 
   <span class="hljs-keyword">return</span> {

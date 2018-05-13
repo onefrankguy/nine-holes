@@ -196,6 +196,7 @@ const Rules = (function rules() {
 
   return {
     moves,
+    winner,
     winning,
   }
 }());
@@ -270,6 +271,10 @@ const Stage = (function stage() {
   }
 
   function next(message) {
+    if (Rules.winner({ rows: 3, cols: 3, layout: Board.get() })) {
+      return;
+    }
+
     if (!picked) {
       picked = message;
       return;
@@ -288,7 +293,14 @@ const Stage = (function stage() {
     Board.move(picked, message);
     picked = undefined;
 
-    console.log(AI.move('black', { rows: 3, cols: 3, layout: Board.get() }));
+    if ('white' === Rules.winner({ rows: 3, cols: 3, layout: Board.get() })) {
+      return;
+    }
+
+    const move = AI.move('black', { rows: 3, cols: 3, layout: Board.get() });
+    if (move && Board.valid(move[0], move[1])) {
+      Board.move(move[0], move[1]);
+    }
   }
 
   return {
