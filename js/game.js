@@ -44,6 +44,33 @@ const PRNG = (function prng() {
   };
 }());
 
+const Stage = (function stage() {
+  let state = 'unknown';
+
+  function get() {
+    return state;
+  }
+
+  function reset() {
+    state = 'unknown';
+  }
+
+  function onUnknown(message) {
+  }
+
+  function next(message) {
+    if ('unknown' === state) {
+      return onUnknown(message);
+    }
+  }
+
+  return {
+    get,
+    next,
+    reset,
+  };
+}());
+
 const Renderer = (function renderer() {
   let dirty = true;
 
@@ -67,6 +94,7 @@ const Renderer = (function renderer() {
 
 const Game = (function game() {
   function play() {
+    Stage.reset();
     Renderer.invalidate();
     Renderer.render();
   }

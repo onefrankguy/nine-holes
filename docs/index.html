@@ -75,6 +75,33 @@ avoid a non-uniform distribution of random numbers.</p>
   };
 }());
 
+<span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">let</span> state = <span class="hljs-string">'unknown'</span>;
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> state;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
+    state = <span class="hljs-string">'unknown'</span>;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onUnknown</span>(<span class="hljs-params">message</span>) </span>{
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">message</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">'unknown'</span> === state) {
+      <span class="hljs-keyword">return</span> onUnknown(message);
+    }
+  }
+
+  <span class="hljs-keyword">return</span> {
+    get,
+    next,
+    reset,
+  };
+}());
+
 <span class="hljs-keyword">const</span> Renderer = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderer</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> dirty = <span class="hljs-literal">true</span>;
 
@@ -98,6 +125,7 @@ avoid a non-uniform distribution of random numbers.</p>
 
 <span class="hljs-keyword">const</span> Game = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
+    Stage.reset();
     Renderer.invalidate();
     Renderer.render();
   }
