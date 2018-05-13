@@ -44,6 +44,62 @@ const PRNG = (function prng() {
   };
 }());
 
+const Board = (function board() {
+  let layout = {};
+
+  function get() {
+    return Object.assign({}, layout);
+  }
+
+  function canPick(position) {
+    return 'whilte' === layout[position] || 'black' === layout[position];
+  }
+
+  function canPlay(position) {
+    return '' === layout[position] && 'p' !== layout[position][0];
+  }
+
+  function valid(start, end) {
+    return canPick(start) && canPlay(end);
+  }
+
+  function move(start, end) {
+    if (valid(start, end)) {
+      layout[end] = layout[start];
+      layout[start] = '';
+    }
+  }
+
+  function reset() {
+    layout = {};
+
+    layout['p21'] = 'black';
+    layout['p22'] = 'black';
+    layout['p23'] = 'black';
+
+    layout['a3'] = '';
+    layout['b3'] = '';
+    layout['c3'] = '';
+    layout['a2'] = '';
+    layout['b2'] = '';
+    layout['c2'] = '';
+    layout['a1'] = '';
+    layout['b1'] = '';
+    layout['c1'] = '';
+
+    layout['p11'] = 'white';
+    layout['p12'] = 'white';
+    layout['p13'] = 'white';
+  }
+
+  return {
+    get,
+    valid,
+    move,
+    reset,
+  }
+}());
+
 const Stage = (function stage() {
   let state = 'unknown';
 
@@ -74,8 +130,26 @@ const Stage = (function stage() {
 const Renderer = (function renderer() {
   let dirty = true;
 
+  function renderBoard() {
+    const $ = window.jQuery;
+    const layout = Board.get();
+
+    Object.keys(layout).forEach((id) => {
+      if ('' === layout[id]) {
+        $(id).add('hole').remove('piece').remove('white').remove('black');
+      }
+      if ('white' === layout[id]) {
+        $(id).add('white').add('piece').remove('hole').remove('black');
+      }
+      if ('black' === layout[id]) {
+        $(id).add('black').add('piece').remove('hole').remove('white');
+      }
+    });
+  }
+
   function render() {
     if (dirty) {
+      renderBoard();
       dirty = false;
     }
 
@@ -93,18 +167,34 @@ const Renderer = (function renderer() {
 }());
 
 const Game = (function game() {
-  function onPiece(element) {
-    element.toggle('picked');
+  function onPick(element) {
+    Renderer.invalidate();
+  }
+
+  function onPlay(element) {
     Renderer.invalidate();
   }
 
   function play() {
     const $ = window.jQuery;
 
-    $('#p1').touch(undefined, onPiece);
-    $('#p2').touch(undefined, onPiece);
-    $('#p3').touch(undefined, onPiece);
+    $('#a3').touch(onPick, onPlay);
+    $('#b3').touch(onPick, onPlay);
+    $('#c3').touch(onPick, onPlay);
 
+    $('#a2').touch(onPick, onPlay);
+    $('#b2').touch(onPIck, onPlay);
+    $('#c2').touch(onPick, onPlay);
+
+    $('#a1').touch(onPick, onPlay);
+    $('#b1').touch(onPick, onPlay);
+    $('#c1').touch(onPick, onPlay);
+
+    $('#p1').touch(onPick, onPlay);
+    $('#p2').touch(onPick, onPlay);
+    $('#p3').touch(onPick, onPlay);
+
+    Board.reset();
     Stage.reset();
     Renderer.invalidate();
     Renderer.render();
@@ -132,9 +222,17 @@ const Game = (function game() {
     return this;
   }
 
-  Fn.prototype.toggle = function toggle(klass) {
+  Fn.prototype.add = function add(klass) {
     if (this.element && this.element.classList) {
-      this.element.classList.toggle(klass);
+      this.element.classList.add(klass);
+    }
+
+    return this;
+  };
+
+  Fn.prototype.remove = function remove(klass) {
+    if (this.element && this.element.classList) {
+      this.element.classList.remove(klass);
     }
 
     return this;

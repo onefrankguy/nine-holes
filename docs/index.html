@@ -75,6 +75,62 @@ avoid a non-uniform distribution of random numbers.</p>
   };
 }());
 
+<span class="hljs-keyword">const</span> Board = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">board</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">let</span> layout = {};
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.assign({}, layout);
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPick</span>(<span class="hljs-params">position</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'whilte'</span> === layout[position] || <span class="hljs-string">'black'</span> === layout[position];
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPlay</span>(<span class="hljs-params">position</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">''</span> === layout[position] &amp;&amp; <span class="hljs-string">'p'</span> !== layout[position][<span class="hljs-number">0</span>];
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">valid</span>(<span class="hljs-params">start, end</span>) </span>{
+    <span class="hljs-keyword">return</span> canPick(start) &amp;&amp; canPlay(end);
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">move</span>(<span class="hljs-params">start, end</span>) </span>{
+    <span class="hljs-keyword">if</span> (valid(start, end)) {
+      layout[end] = layout[start];
+      layout[start] = <span class="hljs-string">''</span>;
+    }
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
+    layout = {};
+
+    layout[<span class="hljs-string">'p21'</span>] = <span class="hljs-string">'black'</span>;
+    layout[<span class="hljs-string">'p22'</span>] = <span class="hljs-string">'black'</span>;
+    layout[<span class="hljs-string">'p23'</span>] = <span class="hljs-string">'black'</span>;
+
+    layout[<span class="hljs-string">'a3'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'b3'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'c3'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'a2'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'b2'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'c2'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'a1'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'b1'</span>] = <span class="hljs-string">''</span>;
+    layout[<span class="hljs-string">'c1'</span>] = <span class="hljs-string">''</span>;
+
+    layout[<span class="hljs-string">'p11'</span>] = <span class="hljs-string">'white'</span>;
+    layout[<span class="hljs-string">'p12'</span>] = <span class="hljs-string">'white'</span>;
+    layout[<span class="hljs-string">'p13'</span>] = <span class="hljs-string">'white'</span>;
+  }
+
+  <span class="hljs-keyword">return</span> {
+    get,
+    valid,
+    move,
+    reset,
+  }
+}());
+
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> state = <span class="hljs-string">'unknown'</span>;
 
@@ -105,8 +161,26 @@ avoid a non-uniform distribution of random numbers.</p>
 <span class="hljs-keyword">const</span> Renderer = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderer</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> dirty = <span class="hljs-literal">true</span>;
 
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderBoard</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
+    <span class="hljs-keyword">const</span> layout = Board.get();
+
+    <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === layout[id]) {
+        $(id).add(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
+      }
+      <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === layout[id]) {
+        $(id).add(<span class="hljs-string">'white'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'black'</span>);
+      }
+      <span class="hljs-keyword">if</span> (<span class="hljs-string">'black'</span> === layout[id]) {
+        $(id).add(<span class="hljs-string">'black'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'white'</span>);
+      }
+    });
+  }
+
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">if</span> (dirty) {
+      renderBoard();
       dirty = <span class="hljs-literal">false</span>;
     }
 
@@ -124,18 +198,34 @@ avoid a non-uniform distribution of random numbers.</p>
 }());
 
 <span class="hljs-keyword">const</span> Game = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPiece</span>(<span class="hljs-params">element</span>) </span>{
-    element.toggle(<span class="hljs-string">'picked'</span>);
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPick</span>(<span class="hljs-params">element</span>) </span>{
+    Renderer.invalidate();
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPlay</span>(<span class="hljs-params">element</span>) </span>{
     Renderer.invalidate();
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
 
-    $(<span class="hljs-string">'#p1'</span>).touch(<span class="hljs-literal">undefined</span>, onPiece);
-    $(<span class="hljs-string">'#p2'</span>).touch(<span class="hljs-literal">undefined</span>, onPiece);
-    $(<span class="hljs-string">'#p3'</span>).touch(<span class="hljs-literal">undefined</span>, onPiece);
+    $(<span class="hljs-string">'#a3'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#b3'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#c3'</span>).touch(onPick, onPlay);
 
+    $(<span class="hljs-string">'#a2'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#b2'</span>).touch(onPIck, onPlay);
+    $(<span class="hljs-string">'#c2'</span>).touch(onPick, onPlay);
+
+    $(<span class="hljs-string">'#a1'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#b1'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#c1'</span>).touch(onPick, onPlay);
+
+    $(<span class="hljs-string">'#p1'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#p2'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#p3'</span>).touch(onPick, onPlay);
+
+    Board.reset();
     Stage.reset();
     Renderer.invalidate();
     Renderer.render();
@@ -163,9 +253,17 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
   }
 
-  Fn.prototype.toggle = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toggle</span>(<span class="hljs-params">klass</span>) </span>{
+  Fn.prototype.add = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">klass</span>) </span>{
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.element &amp;&amp; <span class="hljs-keyword">this</span>.element.classList) {
-      <span class="hljs-keyword">this</span>.element.classList.toggle(klass);
+      <span class="hljs-keyword">this</span>.element.classList.add(klass);
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+  };
+
+  Fn.prototype.remove = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">remove</span>(<span class="hljs-params">klass</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.element &amp;&amp; <span class="hljs-keyword">this</span>.element.classList) {
+      <span class="hljs-keyword">this</span>.element.classList.remove(klass);
     }
 
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
