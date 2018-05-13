@@ -373,16 +373,13 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
       <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span>+id);
       <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === layout[id]) {
-        element.add(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
-        <span class="hljs-keyword">if</span> (<span class="hljs-string">'p'</span> === id.charAt(<span class="hljs-number">0</span>)) {
-          element.remove(<span class="hljs-string">'hole'</span>);
-        }
+        element.remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
       }
       <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === layout[id]) {
-        element.add(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>).remove(<span class="hljs-string">'hole'</span>);
+        element.add(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
       }
       <span class="hljs-keyword">if</span> (<span class="hljs-string">'black'</span> === layout[id]) {
-        element.add(<span class="hljs-string">'black'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'hole'</span>);
+        element.add(<span class="hljs-string">'black'</span>).remove(<span class="hljs-string">'white'</span>);
       }
     });
   }

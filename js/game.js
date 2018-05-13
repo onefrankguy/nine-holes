@@ -313,16 +313,13 @@ const Renderer = (function renderer() {
     Object.keys(layout).forEach((id) => {
       const element = $('#'+id);
       if ('' === layout[id]) {
-        element.add('hole').remove('white').remove('black');
-        if ('p' === id.charAt(0)) {
-          element.remove('hole');
-        }
+        element.remove('white').remove('black');
       }
       if ('white' === layout[id]) {
-        element.add('white').remove('black').remove('hole');
+        element.add('white').remove('black');
       }
       if ('black' === layout[id]) {
-        element.add('black').remove('white').remove('hole');
+        element.add('black').remove('white');
       }
     });
   }

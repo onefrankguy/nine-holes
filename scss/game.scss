@@ -48,21 +48,24 @@ a, a:visited {
   /* Usable area on an iPhone 4 is 320x372 pixels */
   width: 32rem;
   margin: 0 auto;
-  border: 1px solid black;
 }
 
 .table {
   /* height: 37.2rem; */
+  margin-top: ($font-size / 2);
   justify-content: space-evenly;
 }
 
 /* BOARD */
 $hole-size: ($font-size * 4);
 
-.board > .row + .row {
+.board {
+  border: 1px solid black;
+  border-left: none;
 }
 
-.board > .row > .space + .space {
+.board > .row + .row {
+  border-top: 1px solid black;
 }
 
 .space {
@@ -70,20 +73,18 @@ $hole-size: ($font-size * 4);
   height: $hole-size;
 }
 
-.space.hole {
-  border: 1px solid black;
+.space.empty {
+  border-left: 1px solid black;
 }
 
-.space.black {
-  background: black;
-  border: 1px solid black;
-  border-radius: ($hole-size / 2);
+.space.white:after {
+  content: '\022A1';
+  font-size: ($font-size * 4);
 }
 
-.space.white {
-  background: white;
-  border: 1px solid black;
-  border-radius: ($hole-size / 2);
+.space.black:after {
+  content: '\02299';
+  font-size: ($font-size * 4);
 }
 
 /* STATS */
