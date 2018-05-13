@@ -423,6 +423,12 @@ avoid a non-uniform distribution of random numbers.</p>
     Renderer.invalidate();
   }
 
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onReset</span>(<span class="hljs-params"></span>) </span>{
+    Board.reset();
+    Stage.reset();
+    Renderer.invalidate();
+  }
+
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
     $(<span class="hljs-string">'#p21'</span>).touch(onPick, onPlay);
@@ -444,6 +450,8 @@ avoid a non-uniform distribution of random numbers.</p>
     $(<span class="hljs-string">'#p11'</span>).touch(onPick, onPlay);
     $(<span class="hljs-string">'#p12'</span>).touch(onPick, onPlay);
     $(<span class="hljs-string">'#p13'</span>).touch(onPick, onPlay);
+
+    $(<span class="hljs-string">'#reset'</span>).touch(<span class="hljs-literal">undefined</span>, onReset);
 
     Board.reset();
     Stage.reset();

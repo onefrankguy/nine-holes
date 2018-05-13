@@ -363,6 +363,12 @@ const Game = (function game() {
     Renderer.invalidate();
   }
 
+  function onReset() {
+    Board.reset();
+    Stage.reset();
+    Renderer.invalidate();
+  }
+
   function play() {
     const $ = window.jQuery;
     $('#p21').touch(onPick, onPlay);
@@ -384,6 +390,8 @@ const Game = (function game() {
     $('#p11').touch(onPick, onPlay);
     $('#p12').touch(onPick, onPlay);
     $('#p13').touch(onPick, onPlay);
+
+    $('#reset').touch(undefined, onReset);
 
     Board.reset();
     Stage.reset();

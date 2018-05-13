@@ -34,6 +34,12 @@ a, a:visited {
   flex-direction: column;
 }
 
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* WORLD */
 .world {
   display: flex;
@@ -44,7 +50,6 @@ a, a:visited {
 }
 
 .table {
-  align-items: center;
   height: 37.2rem;
 }
 
@@ -52,11 +57,9 @@ a, a:visited {
 $hole-size: ($font-size * 4);
 
 .board > .row + .row {
-  margin-top: ($font-size / 2);
 }
 
 .board > .row > .space + .space {
-  margin-left: ($font-size / 2);
 }
 
 .space {
@@ -78,4 +81,18 @@ $hole-size: ($font-size * 4);
   background: white;
   border: 1px solid black;
   border-radius: ($hole-size / 2);
+}
+
+/* STATS */
+.button {
+  width: $hole-size;
+  height: $hole-size;
+  border: 1px solid black;
+  border-radius: ($hole-size / 8);
+  background: white;
+}
+
+.reset:after {
+  content: '\021bb';
+  font-size: ($font-size * 2);
 }
