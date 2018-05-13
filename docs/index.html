@@ -92,7 +92,7 @@ avoid a non-uniform distribution of random numbers.</p>
     get,
     move,
     reset,
-  }
+  };
 }());
 
 <span class="hljs-keyword">const</span> Rules = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rules</span>(<span class="hljs-params"></span>) </span>{
@@ -217,7 +217,7 @@ avoid a non-uniform distribution of random numbers.</p>
     moves,
     winner,
     winning,
-  }
+  };
 }());
 
 <span class="hljs-keyword">const</span> AI = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ai</span>(<span class="hljs-params"></span>) </span>{
@@ -294,7 +294,7 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-keyword">return</span> {
     move,
-  }
+  };
 }());
 
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
@@ -361,7 +361,7 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">const</span> layout = Board.get().layout;
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
-      <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span>+id);
+      <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span> + id);
       <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">''</span>) {
         element.remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
       }
@@ -380,11 +380,11 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">const</span> picked = Stage.get();
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
-      $(<span class="hljs-string">'#'</span>+id).remove(<span class="hljs-string">'picked'</span>);
+      $(<span class="hljs-string">'#'</span> + id).remove(<span class="hljs-string">'picked'</span>);
     });
 
     <span class="hljs-keyword">if</span> (picked) {
-      $(<span class="hljs-string">'#'</span>+picked).add(<span class="hljs-string">'picked'</span>);
+      $(<span class="hljs-string">'#'</span> + picked).add(<span class="hljs-string">'picked'</span>);
     }
   }
 
@@ -409,7 +409,7 @@ avoid a non-uniform distribution of random numbers.</p>
 }());
 
 <span class="hljs-keyword">const</span> Game = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPick</span>(<span class="hljs-params">element</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPick</span>(<span class="hljs-params"></span>) </span>{
     Renderer.invalidate();
   }
 

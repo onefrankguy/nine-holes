@@ -63,7 +63,7 @@ const Board = (function board() {
     get,
     move,
     reset,
-  }
+  };
 }());
 
 const Rules = (function rules() {
@@ -180,7 +180,7 @@ const Rules = (function rules() {
     moves,
     winner,
     winning,
-  }
+  };
 }());
 
 const AI = (function ai() {
@@ -236,7 +236,7 @@ const AI = (function ai() {
 
   return {
     move,
-  }
+  };
 }());
 
 const Stage = (function stage() {
@@ -303,7 +303,7 @@ const Renderer = (function renderer() {
     const layout = Board.get().layout;
 
     Object.keys(layout).forEach((id) => {
-      const element = $('#'+id);
+      const element = $('#' + id);
       if (layout[id] === '') {
         element.remove('white').remove('black');
       }
@@ -322,11 +322,11 @@ const Renderer = (function renderer() {
     const picked = Stage.get();
 
     Object.keys(layout).forEach((id) => {
-      $('#'+id).remove('picked');
+      $('#' + id).remove('picked');
     });
 
     if (picked) {
-      $('#'+picked).add('picked');
+      $('#' + picked).add('picked');
     }
   }
 
@@ -351,7 +351,7 @@ const Renderer = (function renderer() {
 }());
 
 const Game = (function game() {
-  function onPick(element) {
+  function onPick() {
     Renderer.invalidate();
   }
 
