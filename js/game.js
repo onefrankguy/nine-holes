@@ -121,7 +121,7 @@ const Rules = (function rules() {
     }
 
     for (let i = 0; i < board.cols; i += 1) {
-      cols.push('' + (i + 1));
+      cols.push(`${i + 1}`);
     }
 
     let result;
@@ -301,7 +301,7 @@ const Renderer = (function renderer() {
     const { layout } = Board.get();
 
     Object.keys(layout).forEach((id) => {
-      const element = $('#' + id);
+      const element = $(`#${id}`);
       if (layout[id] === '') {
         element.remove('white').remove('black');
       }
@@ -320,11 +320,11 @@ const Renderer = (function renderer() {
     const picked = Stage.get();
 
     Object.keys(layout).forEach((id) => {
-      $('#' + id).remove('picked');
+      $(`#${id}`).remove('picked');
     });
 
     if (picked) {
-      $('#' + picked).add('picked');
+      $(`#${picked}`).add('picked');
     }
   }
 

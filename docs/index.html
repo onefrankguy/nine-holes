@@ -158,7 +158,7 @@ avoid a non-uniform distribution of random numbers.</p>
     }
 
     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; board.cols; i += <span class="hljs-number">1</span>) {
-      cols.push(<span class="hljs-string">''</span> + (i + <span class="hljs-number">1</span>));
+      cols.push(<span class="hljs-string">`<span class="hljs-subst">${i + <span class="hljs-number">1</span>}</span>`</span>);
     }
 
     <span class="hljs-keyword">let</span> result;
@@ -359,7 +359,7 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">const</span> { layout } = Board.get();
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
-      <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span> + id);
+      <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>);
       <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">''</span>) {
         element.remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
       }
@@ -378,11 +378,11 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">const</span> picked = Stage.get();
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
-      $(<span class="hljs-string">'#'</span> + id).remove(<span class="hljs-string">'picked'</span>);
+      $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).remove(<span class="hljs-string">'picked'</span>);
     });
 
     <span class="hljs-keyword">if</span> (picked) {
-      $(<span class="hljs-string">'#'</span> + picked).add(<span class="hljs-string">'picked'</span>);
+      $(<span class="hljs-string">`#<span class="hljs-subst">${picked}</span>`</span>).add(<span class="hljs-string">'picked'</span>);
     }
   }
 
