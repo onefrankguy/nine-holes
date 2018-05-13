@@ -93,7 +93,18 @@ const Renderer = (function renderer() {
 }());
 
 const Game = (function game() {
+  function onPiece(element) {
+    element.toggle('picked');
+    Renderer.invalidate();
+  }
+
   function play() {
+    const $ = window.jQuery;
+
+    $('#p1').touch(undefined, onPiece);
+    $('#p2').touch(undefined, onPiece);
+    $('#p3').touch(undefined, onPiece);
+
     Stage.reset();
     Renderer.invalidate();
     Renderer.render();
@@ -102,6 +113,80 @@ const Game = (function game() {
   return {
     play,
   };
+}());
+
+(function $() {
+  function Fn(selector) {
+    if (selector instanceof Fn) {
+      return selector;
+    }
+
+    this.element = selector;
+
+    if (typeof selector === 'string') {
+      if (selector.indexOf('#') === 0) {
+        this.element = document.getElementById(selector.slice(1));
+      }
+    }
+
+    return this;
+  }
+
+  Fn.prototype.toggle = function toggle(klass) {
+    if (this.element && this.element.classList) {
+      this.element.classList.toggle(klass);
+    }
+
+    return this;
+  };
+
+  Fn.prototype.touch = function touch(start, end) {
+    const self = this;
+
+    if (this.element) {
+      if ('ontouchstart' in document.documentElement === false) {
+        this.element.onmousedown = function onmousedown(mouseDownEvent) {
+          if (start) {
+            start(self, mouseDownEvent);
+          }
+          document.onmousemove = function onmousemove(e) {
+            e.preventDefault();
+          };
+          document.onmouseup = function onmouseup(e) {
+            if (end) {
+              end(self, e);
+            }
+            document.onmousemove = undefined;
+            document.onmouseup = undefined;
+          };
+        };
+      } else {
+        this.element.ontouchstart = function ontouchstart(touchStartEvent) {
+          if (start) {
+            start(self, touchStartEvent);
+          }
+          document.ontouchmove = function ontouchmove(e) {
+            e.preventDefault();
+          };
+          document.ontouchend = function ontouchend(e) {
+            if (end) {
+              end(self, e);
+            }
+            document.ontouchmove = undefined;
+            document.ontouchend = undefined;
+          };
+        };
+      }
+    }
+
+    return this;
+  };
+
+  function root(selector) {
+    return new Fn(selector);
+  }
+
+  window.jQuery = root;
 }());
 
 Game.play();
