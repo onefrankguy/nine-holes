@@ -52,7 +52,7 @@ const Board = (function board() {
   }
 
   function canPick(position) {
-    return 'whilte' === layout[position] || 'black' === layout[position];
+    return 'white' === layout[position] || 'black' === layout[position];
   }
 
   function canPlay(position) {
@@ -101,23 +101,36 @@ const Board = (function board() {
 }());
 
 const Stage = (function stage() {
-  let state = 'unknown';
+  let state = 'drop';
+  let picked = undefined;
 
   function get() {
     return state;
   }
 
   function reset() {
-    state = 'unknown';
-  }
-
-  function onUnknown(message) {
+    state = 'drop';
+    picked = undefined;
   }
 
   function next(message) {
-    if ('unknown' === state) {
-      return onUnknown(message);
+    if (!picked) {
+      picked = message;
+      return;
     }
+
+    if (picked === message) {
+      picked = undefined;
+      return;
+    }
+
+    if (!Board.valid(picked, message)) {
+      picked = undefined;
+      return;
+    }
+
+    Board.move(picked, message);
+    picked = undefined;
   }
 
   return {
@@ -136,13 +149,13 @@ const Renderer = (function renderer() {
 
     Object.keys(layout).forEach((id) => {
       if ('' === layout[id]) {
-        $(id).add('hole').remove('piece').remove('white').remove('black');
+        $('#'+id).remove('piece').remove('white').remove('black');
       }
       if ('white' === layout[id]) {
-        $(id).add('white').add('piece').remove('hole').remove('black');
+        $('#'+id).add('white').add('piece').remove('black');
       }
       if ('black' === layout[id]) {
-        $(id).add('black').add('piece').remove('hole').remove('white');
+        $('#'+id).add('black').add('piece').remove('white');
       }
     });
   }
@@ -172,27 +185,31 @@ const Game = (function game() {
   }
 
   function onPlay(element) {
+    Stage.next(element.unwrap().id);
     Renderer.invalidate();
   }
 
   function play() {
     const $ = window.jQuery;
+    $('#p21').touch(onPick, onPlay);
+    $('#p22').touch(onPick, onPlay);
+    $('#p23').touch(onPick, onPlay);
 
     $('#a3').touch(onPick, onPlay);
     $('#b3').touch(onPick, onPlay);
     $('#c3').touch(onPick, onPlay);
 
     $('#a2').touch(onPick, onPlay);
-    $('#b2').touch(onPIck, onPlay);
+    $('#b2').touch(onPick, onPlay);
     $('#c2').touch(onPick, onPlay);
 
     $('#a1').touch(onPick, onPlay);
     $('#b1').touch(onPick, onPlay);
     $('#c1').touch(onPick, onPlay);
 
-    $('#p1').touch(onPick, onPlay);
-    $('#p2').touch(onPick, onPlay);
-    $('#p3').touch(onPick, onPlay);
+    $('#p11').touch(onPick, onPlay);
+    $('#p12').touch(onPick, onPlay);
+    $('#p13').touch(onPick, onPlay);
 
     Board.reset();
     Stage.reset();
@@ -278,6 +295,10 @@ const Game = (function game() {
     }
 
     return this;
+  };
+
+  Fn.prototype.unwrap = function unwrap() {
+    return this.element;
   };
 
   function root(selector) {

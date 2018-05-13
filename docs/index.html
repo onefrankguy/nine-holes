@@ -83,7 +83,7 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPick</span>(<span class="hljs-params">position</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-string">'whilte'</span> === layout[position] || <span class="hljs-string">'black'</span> === layout[position];
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'white'</span> === layout[position] || <span class="hljs-string">'black'</span> === layout[position];
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPlay</span>(<span class="hljs-params">position</span>) </span>{
@@ -132,23 +132,36 @@ avoid a non-uniform distribution of random numbers.</p>
 }());
 
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">let</span> state = <span class="hljs-string">'unknown'</span>;
+  <span class="hljs-keyword">let</span> state = <span class="hljs-string">'drop'</span>;
+  <span class="hljs-keyword">let</span> picked = <span class="hljs-literal">undefined</span>;
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">return</span> state;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
-    state = <span class="hljs-string">'unknown'</span>;
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onUnknown</span>(<span class="hljs-params">message</span>) </span>{
+    state = <span class="hljs-string">'drop'</span>;
+    picked = <span class="hljs-literal">undefined</span>;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">message</span>) </span>{
-    <span class="hljs-keyword">if</span> (<span class="hljs-string">'unknown'</span> === state) {
-      <span class="hljs-keyword">return</span> onUnknown(message);
+    <span class="hljs-keyword">if</span> (!picked) {
+      picked = message;
+      <span class="hljs-keyword">return</span>;
     }
+
+    <span class="hljs-keyword">if</span> (picked === message) {
+      picked = <span class="hljs-literal">undefined</span>;
+      <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-keyword">if</span> (!Board.valid(picked, message)) {
+      picked = <span class="hljs-literal">undefined</span>;
+      <span class="hljs-keyword">return</span>;
+    }
+
+    Board.move(picked, message);
+    picked = <span class="hljs-literal">undefined</span>;
   }
 
   <span class="hljs-keyword">return</span> {
@@ -167,13 +180,13 @@ avoid a non-uniform distribution of random numbers.</p>
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
       <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === layout[id]) {
-        $(id).add(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
+        $(<span class="hljs-string">'#'</span>+id).remove(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
       }
       <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === layout[id]) {
-        $(id).add(<span class="hljs-string">'white'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'black'</span>);
+        $(<span class="hljs-string">'#'</span>+id).add(<span class="hljs-string">'white'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'black'</span>);
       }
       <span class="hljs-keyword">if</span> (<span class="hljs-string">'black'</span> === layout[id]) {
-        $(id).add(<span class="hljs-string">'black'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'white'</span>);
+        $(<span class="hljs-string">'#'</span>+id).add(<span class="hljs-string">'black'</span>).add(<span class="hljs-string">'piece'</span>).remove(<span class="hljs-string">'white'</span>);
       }
     });
   }
@@ -203,27 +216,31 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPlay</span>(<span class="hljs-params">element</span>) </span>{
+    Stage.next(element.unwrap().id);
     Renderer.invalidate();
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
+    $(<span class="hljs-string">'#p21'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#p22'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#p23'</span>).touch(onPick, onPlay);
 
     $(<span class="hljs-string">'#a3'</span>).touch(onPick, onPlay);
     $(<span class="hljs-string">'#b3'</span>).touch(onPick, onPlay);
     $(<span class="hljs-string">'#c3'</span>).touch(onPick, onPlay);
 
     $(<span class="hljs-string">'#a2'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#b2'</span>).touch(onPIck, onPlay);
+    $(<span class="hljs-string">'#b2'</span>).touch(onPick, onPlay);
     $(<span class="hljs-string">'#c2'</span>).touch(onPick, onPlay);
 
     $(<span class="hljs-string">'#a1'</span>).touch(onPick, onPlay);
     $(<span class="hljs-string">'#b1'</span>).touch(onPick, onPlay);
     $(<span class="hljs-string">'#c1'</span>).touch(onPick, onPlay);
 
-    $(<span class="hljs-string">'#p1'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#p2'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#p3'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#p11'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#p12'</span>).touch(onPick, onPlay);
+    $(<span class="hljs-string">'#p13'</span>).touch(onPick, onPlay);
 
     Board.reset();
     Stage.reset();
@@ -309,6 +326,10 @@ avoid a non-uniform distribution of random numbers.</p>
     }
 
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+  };
+
+  Fn.prototype.unwrap = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unwrap</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.element;
   };
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">root</span>(<span class="hljs-params">selector</span>) </span>{

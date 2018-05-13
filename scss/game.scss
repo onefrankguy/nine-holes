@@ -67,7 +67,6 @@ $hole-size: ($font-size * 4);
 
 /* PIECES */
 .piece {
-  display: inline-block;
   width: $hole-size;
   height: $hole-size;
   border: 1px solid black;
