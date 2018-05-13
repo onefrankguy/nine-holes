@@ -79,7 +79,7 @@ avoid a non-uniform distribution of random numbers.</p>
   <span class="hljs-keyword">let</span> layout = {};
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.assign({}, layout);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify({ <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, layout }));
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPick</span>(<span class="hljs-params">position</span>) </span>{
@@ -318,20 +318,14 @@ avoid a non-uniform distribution of random numbers.</p>
 }());
 
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">let</span> state = <span class="hljs-string">'drop'</span>;
   <span class="hljs-keyword">let</span> picked = <span class="hljs-literal">undefined</span>;
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
-    <span class="hljs-keyword">return</span> state;
-  }
-
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
-    state = <span class="hljs-string">'drop'</span>;
     picked = <span class="hljs-literal">undefined</span>;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">message</span>) </span>{
-    <span class="hljs-keyword">if</span> (Rules.winner({ <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() })) {
+    <span class="hljs-keyword">if</span> (Rules.winner(Board.get())) {
       <span class="hljs-keyword">return</span>;
     }
 
@@ -353,18 +347,17 @@ avoid a non-uniform distribution of random numbers.</p>
     Board.move(picked, message);
     picked = <span class="hljs-literal">undefined</span>;
 
-    <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === Rules.winner({ <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() })) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === Rules.winner(Board.get())) {
       <span class="hljs-keyword">return</span>;
     }
 
-    <span class="hljs-keyword">const</span> move = AI.move(<span class="hljs-string">'black'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() });
+    <span class="hljs-keyword">const</span> move = AI.move(<span class="hljs-string">'black'</span>, Board.get());
     <span class="hljs-keyword">if</span> (move &amp;&amp; Board.valid(move[<span class="hljs-number">0</span>], move[<span class="hljs-number">1</span>])) {
       Board.move(move[<span class="hljs-number">0</span>], move[<span class="hljs-number">1</span>]);
     }
   }
 
   <span class="hljs-keyword">return</span> {
-    get,
     next,
     reset,
   };
@@ -375,7 +368,7 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderBoard</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
-    <span class="hljs-keyword">const</span> layout = Board.get();
+    <span class="hljs-keyword">const</span> layout = Board.get().layout;
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
       <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span>+id);

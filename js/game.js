@@ -48,7 +48,7 @@ const Board = (function board() {
   let layout = {};
 
   function get() {
-    return Object.assign({}, layout);
+    return JSON.parse(JSON.stringify({ rows: 3, cols: 3, layout }));
   }
 
   function canPick(position) {
@@ -258,20 +258,14 @@ const AI = (function ai() {
 }());
 
 const Stage = (function stage() {
-  let state = 'drop';
   let picked = undefined;
 
-  function get() {
-    return state;
-  }
-
   function reset() {
-    state = 'drop';
     picked = undefined;
   }
 
   function next(message) {
-    if (Rules.winner({ rows: 3, cols: 3, layout: Board.get() })) {
+    if (Rules.winner(Board.get())) {
       return;
     }
 
@@ -293,18 +287,17 @@ const Stage = (function stage() {
     Board.move(picked, message);
     picked = undefined;
 
-    if ('white' === Rules.winner({ rows: 3, cols: 3, layout: Board.get() })) {
+    if ('white' === Rules.winner(Board.get())) {
       return;
     }
 
-    const move = AI.move('black', { rows: 3, cols: 3, layout: Board.get() });
+    const move = AI.move('black', Board.get());
     if (move && Board.valid(move[0], move[1])) {
       Board.move(move[0], move[1]);
     }
   }
 
   return {
-    get,
     next,
     reset,
   };
@@ -315,7 +308,7 @@ const Renderer = (function renderer() {
 
   function renderBoard() {
     const $ = window.jQuery;
-    const layout = Board.get();
+    const layout = Board.get().layout;
 
     Object.keys(layout).forEach((id) => {
       const element = $('#'+id);
