@@ -100,6 +100,96 @@ const Board = (function board() {
   }
 }());
 
+const Rules = (function rules() {
+  function moves(player, board) {
+    const starting = [];
+    const ending = [];
+
+    Object.keys(board.layout).forEach((position) => {
+      if (player === board.layout[position]) {
+        starting.push(position);
+      }
+      if ('' === board.layout[position]) {
+        ending.push(position);
+      }
+    });
+
+    const results = [];
+
+    starting.forEach((start) => {
+      ending.forEach((end) => {
+        results.push([start, end]);
+      });
+    });
+
+    return results;
+  }
+
+  function winner(board) {
+    const rows = [];
+    const cols = [];
+
+    for (let i = 0; i < board.rows; i += 1) {
+      rows.push(String.fromCharCode(97 + i));
+    }
+
+    for (let i = 0; i < board.cols; i += 1) {
+      cols.push('' + (i + 1));
+    }
+
+    let result = undefined;
+
+    rows.forEach((row) => {
+      if (!result) {
+        const players = [];
+
+        cols.forEach((col) => {
+          players.push(board.layout[row + col]);
+        });
+
+        if (1 === new Set(players).size && '' !== players[0]) {
+          result = players[0];
+        }
+      }
+    });
+
+    cols.forEach((col) => {
+      if (!result) {
+        const players = [];
+
+        rows.forEach((row) => {
+          players.push(board.layout[row + col]);
+        });
+
+        if (1 === new Set(players).size && '' !== players[0]) {
+          result = players[0];
+        }
+      }
+    });
+
+    return result;
+  }
+
+  function winning(player, board) {
+    const results = [];
+
+    moves(player, board).forEach((move) => {
+      const test = JSON.parse(JSON.stringify(board));
+      test.layout[move[1]] = test.layout[move[0]];
+      test.layout[move[0]] = '';
+      if (player === winner(test)) {
+        results.push(move);
+      }
+    });
+
+    return results;
+  }
+
+  return {
+    winning,
+  }
+}());
+
 const Stage = (function stage() {
   let state = 'drop';
   let picked = undefined;
@@ -131,6 +221,9 @@ const Stage = (function stage() {
 
     Board.move(picked, message);
     picked = undefined;
+
+    console.log(Rules.winning('white', { rows: 3, cols: 3, layout: Board.get() }));
+    console.log(Rules.winning('black', { rows: 3, cols: 3, layout: Board.get() }));
   }
 
   return {

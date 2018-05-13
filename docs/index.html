@@ -131,6 +131,96 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 }());
 
+<span class="hljs-keyword">const</span> Rules = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rules</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">moves</span>(<span class="hljs-params">player, board</span>) </span>{
+    <span class="hljs-keyword">const</span> starting = [];
+    <span class="hljs-keyword">const</span> ending = [];
+
+    <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">position</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (player === board.layout[position]) {
+        starting.push(position);
+      }
+      <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === board.layout[position]) {
+        ending.push(position);
+      }
+    });
+
+    <span class="hljs-keyword">const</span> results = [];
+
+    starting.forEach(<span class="hljs-function">(<span class="hljs-params">start</span>) =&gt;</span> {
+      ending.forEach(<span class="hljs-function">(<span class="hljs-params">end</span>) =&gt;</span> {
+        results.push([start, end]);
+      });
+    });
+
+    <span class="hljs-keyword">return</span> results;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">winner</span>(<span class="hljs-params">board</span>) </span>{
+    <span class="hljs-keyword">const</span> rows = [];
+    <span class="hljs-keyword">const</span> cols = [];
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; board.rows; i += <span class="hljs-number">1</span>) {
+      rows.push(<span class="hljs-built_in">String</span>.fromCharCode(<span class="hljs-number">97</span> + i));
+    }
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; board.cols; i += <span class="hljs-number">1</span>) {
+      cols.push(<span class="hljs-string">''</span> + (i + <span class="hljs-number">1</span>));
+    }
+
+    <span class="hljs-keyword">let</span> result = <span class="hljs-literal">undefined</span>;
+
+    rows.forEach(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (!result) {
+        <span class="hljs-keyword">const</span> players = [];
+
+        cols.forEach(<span class="hljs-function">(<span class="hljs-params">col</span>) =&gt;</span> {
+          players.push(board.layout[row + col]);
+        });
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-number">1</span> === <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size &amp;&amp; <span class="hljs-string">''</span> !== players[<span class="hljs-number">0</span>]) {
+          result = players[<span class="hljs-number">0</span>];
+        }
+      }
+    });
+
+    cols.forEach(<span class="hljs-function">(<span class="hljs-params">col</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (!result) {
+        <span class="hljs-keyword">const</span> players = [];
+
+        rows.forEach(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> {
+          players.push(board.layout[row + col]);
+        });
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-number">1</span> === <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size &amp;&amp; <span class="hljs-string">''</span> !== players[<span class="hljs-number">0</span>]) {
+          result = players[<span class="hljs-number">0</span>];
+        }
+      }
+    });
+
+    <span class="hljs-keyword">return</span> result;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">winning</span>(<span class="hljs-params">player, board</span>) </span>{
+    <span class="hljs-keyword">const</span> results = [];
+
+    moves(player, board).forEach(<span class="hljs-function">(<span class="hljs-params">move</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> test = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify(board));
+      test.layout[move[<span class="hljs-number">1</span>]] = test.layout[move[<span class="hljs-number">0</span>]];
+      test.layout[move[<span class="hljs-number">0</span>]] = <span class="hljs-string">''</span>;
+      <span class="hljs-keyword">if</span> (player === winner(test)) {
+        results.push(move);
+      }
+    });
+
+    <span class="hljs-keyword">return</span> results;
+  }
+
+  <span class="hljs-keyword">return</span> {
+    winning,
+  }
+}());
+
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> state = <span class="hljs-string">'drop'</span>;
   <span class="hljs-keyword">let</span> picked = <span class="hljs-literal">undefined</span>;
@@ -162,6 +252,9 @@ avoid a non-uniform distribution of random numbers.</p>
 
     Board.move(picked, message);
     picked = <span class="hljs-literal">undefined</span>;
+
+    <span class="hljs-built_in">console</span>.log(Rules.winning(<span class="hljs-string">'white'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() }));
+    <span class="hljs-built_in">console</span>.log(Rules.winning(<span class="hljs-string">'black'</span>, { <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">layout</span>: Board.get() }));
   }
 
   <span class="hljs-keyword">return</span> {
