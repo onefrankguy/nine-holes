@@ -83,7 +83,7 @@ const Rules = (function rules() {
     const results = [];
 
     Object.keys(board.layout).forEach((position) => {
-      if ('' === board.layout[position]) {
+      if (board.layout[position] === '') {
         results.push(position);
       }
     });
@@ -103,10 +103,10 @@ const Rules = (function rules() {
     });
 
     // Moves where you return a piece to a starting row are invalid.
-    const moves = possible.filter(move => 'p' !== move[1].charAt(0));
+    const moves = possible.filter(move => move[1].charAt(0) !== 'p');
 
     // Moves from a starting row must be played first.
-    const drops = moves.filter(move => 'p' === move[0].charAt(0));
+    const drops = moves.filter(move => move[0].charAt(0) === 'p');
     if (drops.length > 0) {
       return drops;
     }
@@ -136,7 +136,7 @@ const Rules = (function rules() {
           players.push(board.layout[row + col]);
         });
 
-        if (1 === new Set(players).size && '' !== players[0]) {
+        if (new Set(players).size === 1 && players[0] !== '') {
           result = players[0];
         }
       }
@@ -150,7 +150,7 @@ const Rules = (function rules() {
           players.push(board.layout[row + col]);
         });
 
-        if (1 === new Set(players).size && '' !== players[0]) {
+        if (new Set(players).size === 1 && players[0] !== '') {
           result = players[0];
         }
       }
@@ -278,7 +278,7 @@ const Stage = (function stage() {
     Board.move(picked, message);
     picked = undefined;
 
-    if ('white' === Rules.winner(Board.get())) {
+    if (Rules.winner(Board.get()) === 'white') {
       return;
     }
 
@@ -304,13 +304,13 @@ const Renderer = (function renderer() {
 
     Object.keys(layout).forEach((id) => {
       const element = $('#'+id);
-      if ('' === layout[id]) {
+      if (layout[id] === '') {
         element.remove('white').remove('black');
       }
-      if ('white' === layout[id]) {
+      if (layout[id] === 'white') {
         element.add('white').remove('black');
       }
-      if ('black' === layout[id]) {
+      if (layout[id] === 'black') {
         element.add('black').remove('white');
       }
     });

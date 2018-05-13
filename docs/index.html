@@ -112,7 +112,7 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">const</span> results = [];
 
     <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">position</span>) =&gt;</span> {
-      <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === board.layout[position]) {
+      <span class="hljs-keyword">if</span> (board.layout[position] === <span class="hljs-string">''</span>) {
         results.push(position);
       }
     });
@@ -136,14 +136,14 @@ avoid a non-uniform distribution of random numbers.</p>
         <p>Moves where you return a piece to a starting row are invalid.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> moves = possible.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> <span class="hljs-string">'p'</span> !== move[<span class="hljs-number">1</span>].charAt(<span class="hljs-number">0</span>));</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> moves = possible.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move[<span class="hljs-number">1</span>].charAt(<span class="hljs-number">0</span>) !== <span class="hljs-string">'p'</span>);</pre></div>
         
       
         
         <p>Moves from a starting row must be played first.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> drops = moves.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> <span class="hljs-string">'p'</span> === move[<span class="hljs-number">0</span>].charAt(<span class="hljs-number">0</span>));
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> drops = moves.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move[<span class="hljs-number">0</span>].charAt(<span class="hljs-number">0</span>) === <span class="hljs-string">'p'</span>);
     <span class="hljs-keyword">if</span> (drops.length &gt; <span class="hljs-number">0</span>) {
       <span class="hljs-keyword">return</span> drops;
     }
@@ -173,7 +173,7 @@ avoid a non-uniform distribution of random numbers.</p>
           players.push(board.layout[row + col]);
         });
 
-        <span class="hljs-keyword">if</span> (<span class="hljs-number">1</span> === <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size &amp;&amp; <span class="hljs-string">''</span> !== players[<span class="hljs-number">0</span>]) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
           result = players[<span class="hljs-number">0</span>];
         }
       }
@@ -187,7 +187,7 @@ avoid a non-uniform distribution of random numbers.</p>
           players.push(board.layout[row + col]);
         });
 
-        <span class="hljs-keyword">if</span> (<span class="hljs-number">1</span> === <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size &amp;&amp; <span class="hljs-string">''</span> !== players[<span class="hljs-number">0</span>]) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
           result = players[<span class="hljs-number">0</span>];
         }
       }
@@ -336,7 +336,7 @@ avoid a non-uniform distribution of random numbers.</p>
     Board.move(picked, message);
     picked = <span class="hljs-literal">undefined</span>;
 
-    <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === Rules.winner(Board.get())) {
+    <span class="hljs-keyword">if</span> (Rules.winner(Board.get()) === <span class="hljs-string">'white'</span>) {
       <span class="hljs-keyword">return</span>;
     }
 
@@ -362,13 +362,13 @@ avoid a non-uniform distribution of random numbers.</p>
 
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
       <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span>+id);
-      <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === layout[id]) {
+      <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">''</span>) {
         element.remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
       }
-      <span class="hljs-keyword">if</span> (<span class="hljs-string">'white'</span> === layout[id]) {
+      <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">'white'</span>) {
         element.add(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
       }
-      <span class="hljs-keyword">if</span> (<span class="hljs-string">'black'</span> === layout[id]) {
+      <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">'black'</span>) {
         element.add(<span class="hljs-string">'black'</span>).remove(<span class="hljs-string">'white'</span>);
       }
     });
