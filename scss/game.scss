@@ -103,6 +103,7 @@ $hole-size: ($font-size * 4);
 .reset:after {
   content: '\021bb';
   font-size: ($font-size * 2);
+  font-weight: bold;
 }
 
 /* NOTES */
