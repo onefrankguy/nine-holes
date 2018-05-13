@@ -101,6 +101,18 @@ const Board = (function board() {
 }());
 
 const Rules = (function rules() {
+  function pickable(player, board) {
+    const results = [];
+
+    Object.keys(board.layout).forEach((position) => {
+      if (player === board.layout[position]) {
+        results.push(position);
+      }
+    });
+
+    return results;
+  }
+
   function moves(player, board) {
     const starting = [];
     const ending = [];
@@ -195,6 +207,7 @@ const Rules = (function rules() {
   }
 
   return {
+    pickable,
     moves,
     winner,
     winning,
@@ -260,27 +273,32 @@ const AI = (function ai() {
 const Stage = (function stage() {
   let picked = undefined;
 
+  function get() {
+    return picked;
+  }
+
   function reset() {
     picked = undefined;
   }
 
   function next(message) {
-    if (Rules.winner(Board.get())) {
+    const board = Board.get();
+
+    if (Rules.winner(board)) {
       return;
     }
 
-    if (!picked) {
+    const pickable = Rules.pickable('white', board).indexOf(message) > -1;
+
+    if (!picked && pickable) {
       picked = message;
       return;
     }
 
-    if (picked === message) {
-      picked = undefined;
-      return;
-    }
-
     if (!Board.valid(picked, message)) {
-      picked = undefined;
+      if (pickable) {
+        picked = message;
+      }
       return;
     }
 
@@ -298,6 +316,7 @@ const Stage = (function stage() {
   }
 
   return {
+    get,
     next,
     reset,
   };
@@ -324,9 +343,24 @@ const Renderer = (function renderer() {
     });
   }
 
+  function renderPicked() {
+    const $ = window.jQuery;
+    const layout = Board.get().layout;
+    const picked = Stage.get();
+
+    Object.keys(layout).forEach((id) => {
+      $('#'+id).remove('picked');
+    });
+
+    if (picked) {
+      $('#'+picked).add('picked');
+    }
+  }
+
   function render() {
     if (dirty) {
       renderBoard();
+      renderPicked();
       dirty = false;
     }
 

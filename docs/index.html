@@ -132,6 +132,18 @@ avoid a non-uniform distribution of random numbers.</p>
 }());
 
 <span class="hljs-keyword">const</span> Rules = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rules</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pickable</span>(<span class="hljs-params">player, board</span>) </span>{
+    <span class="hljs-keyword">const</span> results = [];
+
+    <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">position</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (player === board.layout[position]) {
+        results.push(position);
+      }
+    });
+
+    <span class="hljs-keyword">return</span> results;
+  }
+
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">moves</span>(<span class="hljs-params">player, board</span>) </span>{
     <span class="hljs-keyword">const</span> starting = [];
     <span class="hljs-keyword">const</span> ending = [];
@@ -234,6 +246,7 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-keyword">return</span> {
+    pickable,
     moves,
     winner,
     winning,
@@ -320,27 +333,32 @@ avoid a non-uniform distribution of random numbers.</p>
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> picked = <span class="hljs-literal">undefined</span>;
 
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> picked;
+  }
+
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
     picked = <span class="hljs-literal">undefined</span>;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">message</span>) </span>{
-    <span class="hljs-keyword">if</span> (Rules.winner(Board.get())) {
+    <span class="hljs-keyword">const</span> board = Board.get();
+
+    <span class="hljs-keyword">if</span> (Rules.winner(board)) {
       <span class="hljs-keyword">return</span>;
     }
 
-    <span class="hljs-keyword">if</span> (!picked) {
+    <span class="hljs-keyword">const</span> pickable = Rules.pickable(<span class="hljs-string">'white'</span>, board).indexOf(message) &gt; <span class="hljs-number">-1</span>;
+
+    <span class="hljs-keyword">if</span> (!picked &amp;&amp; pickable) {
       picked = message;
       <span class="hljs-keyword">return</span>;
     }
 
-    <span class="hljs-keyword">if</span> (picked === message) {
-      picked = <span class="hljs-literal">undefined</span>;
-      <span class="hljs-keyword">return</span>;
-    }
-
     <span class="hljs-keyword">if</span> (!Board.valid(picked, message)) {
-      picked = <span class="hljs-literal">undefined</span>;
+      <span class="hljs-keyword">if</span> (pickable) {
+        picked = message;
+      }
       <span class="hljs-keyword">return</span>;
     }
 
@@ -358,6 +376,7 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-keyword">return</span> {
+    get,
     next,
     reset,
   };
@@ -384,9 +403,24 @@ avoid a non-uniform distribution of random numbers.</p>
     });
   }
 
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderPicked</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
+    <span class="hljs-keyword">const</span> layout = Board.get().layout;
+    <span class="hljs-keyword">const</span> picked = Stage.get();
+
+    <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
+      $(<span class="hljs-string">'#'</span>+id).remove(<span class="hljs-string">'picked'</span>);
+    });
+
+    <span class="hljs-keyword">if</span> (picked) {
+      $(<span class="hljs-string">'#'</span>+picked).add(<span class="hljs-string">'picked'</span>);
+    }
+  }
+
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">if</span> (dirty) {
       renderBoard();
+      renderPicked();
       dirty = <span class="hljs-literal">false</span>;
     }
 

@@ -87,6 +87,10 @@ $hole-size: ($font-size * 4);
   font-size: ($font-size * 4);
 }
 
+.picked {
+  color: gray;
+}
+
 /* STATS */
 .button {
   width: $hole-size;
