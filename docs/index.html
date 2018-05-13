@@ -67,25 +67,23 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
-    layout = {};
-
-    layout[<span class="hljs-string">'p21'</span>] = <span class="hljs-string">'black'</span>;
-    layout[<span class="hljs-string">'p22'</span>] = <span class="hljs-string">'black'</span>;
-    layout[<span class="hljs-string">'p23'</span>] = <span class="hljs-string">'black'</span>;
-
-    layout[<span class="hljs-string">'a3'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'b3'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'c3'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'a2'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'b2'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'c2'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'a1'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'b1'</span>] = <span class="hljs-string">''</span>;
-    layout[<span class="hljs-string">'c1'</span>] = <span class="hljs-string">''</span>;
-
-    layout[<span class="hljs-string">'p11'</span>] = <span class="hljs-string">'white'</span>;
-    layout[<span class="hljs-string">'p12'</span>] = <span class="hljs-string">'white'</span>;
-    layout[<span class="hljs-string">'p13'</span>] = <span class="hljs-string">'white'</span>;
+    layout = {
+      <span class="hljs-attr">p21</span>: <span class="hljs-string">'black'</span>,
+      <span class="hljs-attr">p22</span>: <span class="hljs-string">'black'</span>,
+      <span class="hljs-attr">p23</span>: <span class="hljs-string">'black'</span>,
+      <span class="hljs-attr">a3</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">b3</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">c3</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">a2</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">b2</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">c2</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">a1</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">b1</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">c1</span>: <span class="hljs-string">''</span>,
+      <span class="hljs-attr">p11</span>: <span class="hljs-string">'white'</span>,
+      <span class="hljs-attr">p12</span>: <span class="hljs-string">'white'</span>,
+      <span class="hljs-attr">p13</span>: <span class="hljs-string">'white'</span>,
+    };
   }
 
   <span class="hljs-keyword">return</span> {
@@ -136,19 +134,19 @@ avoid a non-uniform distribution of random numbers.</p>
         <p>Moves where you return a piece to a starting row are invalid.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> moves = possible.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move[<span class="hljs-number">1</span>].charAt(<span class="hljs-number">0</span>) !== <span class="hljs-string">'p'</span>);</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> valid = possible.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move[<span class="hljs-number">1</span>].charAt(<span class="hljs-number">0</span>) !== <span class="hljs-string">'p'</span>);</pre></div>
         
       
         
         <p>Moves from a starting row must be played first.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> drops = moves.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move[<span class="hljs-number">0</span>].charAt(<span class="hljs-number">0</span>) === <span class="hljs-string">'p'</span>);
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> drops = valid.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move[<span class="hljs-number">0</span>].charAt(<span class="hljs-number">0</span>) === <span class="hljs-string">'p'</span>);
     <span class="hljs-keyword">if</span> (drops.length &gt; <span class="hljs-number">0</span>) {
       <span class="hljs-keyword">return</span> drops;
     }
 
-    <span class="hljs-keyword">return</span> moves;
+    <span class="hljs-keyword">return</span> valid;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">winner</span>(<span class="hljs-params">board</span>) </span>{

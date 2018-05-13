@@ -38,25 +38,23 @@ const Board = (function board() {
   }
 
   function reset() {
-    layout = {};
-
-    layout['p21'] = 'black';
-    layout['p22'] = 'black';
-    layout['p23'] = 'black';
-
-    layout['a3'] = '';
-    layout['b3'] = '';
-    layout['c3'] = '';
-    layout['a2'] = '';
-    layout['b2'] = '';
-    layout['c2'] = '';
-    layout['a1'] = '';
-    layout['b1'] = '';
-    layout['c1'] = '';
-
-    layout['p11'] = 'white';
-    layout['p12'] = 'white';
-    layout['p13'] = 'white';
+    layout = {
+      p21: 'black',
+      p22: 'black',
+      p23: 'black',
+      a3: '',
+      b3: '',
+      c3: '',
+      a2: '',
+      b2: '',
+      c2: '',
+      a1: '',
+      b1: '',
+      c1: '',
+      p11: 'white',
+      p12: 'white',
+      p13: 'white',
+    };
   }
 
   return {
@@ -103,15 +101,15 @@ const Rules = (function rules() {
     });
 
     // Moves where you return a piece to a starting row are invalid.
-    const moves = possible.filter(move => move[1].charAt(0) !== 'p');
+    const valid = possible.filter(move => move[1].charAt(0) !== 'p');
 
     // Moves from a starting row must be played first.
-    const drops = moves.filter(move => move[0].charAt(0) === 'p');
+    const drops = valid.filter(move => move[0].charAt(0) === 'p');
     if (drops.length > 0) {
       return drops;
     }
 
-    return moves;
+    return valid;
   }
 
   function winner(board) {
