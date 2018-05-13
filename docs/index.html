@@ -38,27 +38,7 @@ by Alexander Klimov and Adi Shamer.</p>
         
       
         
-        <p>The PRNG provides an in-place shuffle for use with arrays. It’s based on
-the <a href="https://bost.ocks.org/mike/shuffle/" title="Mike Bostock: Fisher-Yates Shuffle">Fisher-Yates shuffle describe by Mike Bostock</a>.</p>
-
-        
-          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">shuffle</span>(<span class="hljs-params">array</span>) </span>{
-    <span class="hljs-keyword">let</span> m = array.length;
-    <span class="hljs-keyword">let</span> t;
-    <span class="hljs-keyword">let</span> i;
-
-    <span class="hljs-keyword">while</span> (m &gt; <span class="hljs-number">0</span>) {
-      i = <span class="hljs-built_in">Math</span>.floor(random() * m);
-      m -= <span class="hljs-number">1</span>;
-      t = array[m];
-      array[m] = array[i]; <span class="hljs-comment">// eslint-disable-line no-param-reassign</span>
-      array[i] = t; <span class="hljs-comment">// eslint-disable-line no-param-reassign</span>
-    }
-  }</pre></div>
-        
-      
-        
-        <p>Randomly picking items out of arrays is usefull too, so the PRNG provies a
+        <p>Randomly picking items out of arrays is common, so the PRNG provies a
 function to do that. <code>Math.floor()</code> is used instead of <code>Math.round()</code> to
 avoid a non-uniform distribution of random numbers.</p>
 
@@ -70,7 +50,6 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-keyword">return</span> {
     random,
-    shuffle,
     pick,
   };
 }());
@@ -82,23 +61,9 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">return</span> <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify({ <span class="hljs-attr">rows</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">cols</span>: <span class="hljs-number">3</span>, layout }));
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPick</span>(<span class="hljs-params">position</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-string">'white'</span> === layout[position] || <span class="hljs-string">'black'</span> === layout[position];
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPlay</span>(<span class="hljs-params">position</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-string">''</span> === layout[position] &amp;&amp; <span class="hljs-string">'p'</span> !== position.charAt(<span class="hljs-number">0</span>);
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">valid</span>(<span class="hljs-params">start, end</span>) </span>{
-    <span class="hljs-keyword">return</span> canPick(start) &amp;&amp; canPlay(end);
-  }
-
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">move</span>(<span class="hljs-params">start, end</span>) </span>{
-    <span class="hljs-keyword">if</span> (valid(start, end)) {
-      layout[end] = layout[start];
-      layout[start] = <span class="hljs-string">''</span>;
-    }
+    layout[end] = layout[start];
+    layout[start] = <span class="hljs-string">''</span>;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
@@ -125,7 +90,6 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-keyword">return</span> {
     get,
-    valid,
     move,
     reset,
   }
@@ -144,19 +108,21 @@ avoid a non-uniform distribution of random numbers.</p>
     <span class="hljs-keyword">return</span> results;
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">moves</span>(<span class="hljs-params">player, board</span>) </span>{
-    <span class="hljs-keyword">const</span> starting = [];
-    <span class="hljs-keyword">const</span> ending = [];
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">playable</span>(<span class="hljs-params">player, board</span>) </span>{
+    <span class="hljs-keyword">const</span> results = [];
 
     <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">position</span>) =&gt;</span> {
-      <span class="hljs-keyword">if</span> (player === board.layout[position]) {
-        starting.push(position);
-      }
       <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === board.layout[position]) {
-        ending.push(position);
+        results.push(position);
       }
     });
 
+    <span class="hljs-keyword">return</span> results;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">moves</span>(<span class="hljs-params">player, board</span>) </span>{
+    <span class="hljs-keyword">const</span> starting = pickable(player, board);
+    <span class="hljs-keyword">const</span> ending = playable(player, board);
     <span class="hljs-keyword">const</span> possible = [];
 
     starting.forEach(<span class="hljs-function">(<span class="hljs-params">start</span>) =&gt;</span> {
@@ -247,6 +213,7 @@ avoid a non-uniform distribution of random numbers.</p>
 
   <span class="hljs-keyword">return</span> {
     pickable,
+    playable,
     moves,
     winner,
     winning,
@@ -350,12 +317,16 @@ avoid a non-uniform distribution of random numbers.</p>
 
     <span class="hljs-keyword">const</span> pickable = Rules.pickable(<span class="hljs-string">'white'</span>, board).indexOf(message) &gt; <span class="hljs-number">-1</span>;
 
-    <span class="hljs-keyword">if</span> (!picked &amp;&amp; pickable) {
-      picked = message;
+    <span class="hljs-keyword">if</span> (!picked) {
+      <span class="hljs-keyword">if</span> (pickable) {
+        picked = message;
+      }
       <span class="hljs-keyword">return</span>;
     }
 
-    <span class="hljs-keyword">if</span> (!Board.valid(picked, message)) {
+    <span class="hljs-keyword">const</span> playable = Rules.playable(<span class="hljs-string">'white'</span>, board).indexOf(message) &gt; <span class="hljs-number">-1</span>;
+
+    <span class="hljs-keyword">if</span> (!playable) {
       <span class="hljs-keyword">if</span> (pickable) {
         picked = message;
       }
@@ -370,7 +341,7 @@ avoid a non-uniform distribution of random numbers.</p>
     }
 
     <span class="hljs-keyword">const</span> move = AI.move(<span class="hljs-string">'black'</span>, Board.get());
-    <span class="hljs-keyword">if</span> (move &amp;&amp; Board.valid(move[<span class="hljs-number">0</span>], move[<span class="hljs-number">1</span>])) {
+    <span class="hljs-keyword">if</span> (move) {
       Board.move(move[<span class="hljs-number">0</span>], move[<span class="hljs-number">1</span>]);
     }
   }

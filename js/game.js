@@ -11,25 +11,7 @@ const PRNG = (function prng() {
     return (state >>> 32) / max;
   }
 
-  // The PRNG provides an in-place shuffle for use with arrays. It's based on
-  // the [Fisher-Yates shuffle describe by Mike Bostock][fys].
-  //
-  // [fys]: https://bost.ocks.org/mike/shuffle/ "Mike Bostock: Fisher-Yates Shuffle"
-  function shuffle(array) {
-    let m = array.length;
-    let t;
-    let i;
-
-    while (m > 0) {
-      i = Math.floor(random() * m);
-      m -= 1;
-      t = array[m];
-      array[m] = array[i]; // eslint-disable-line no-param-reassign
-      array[i] = t; // eslint-disable-line no-param-reassign
-    }
-  }
-
-  // Randomly picking items out of arrays is usefull too, so the PRNG provies a
+  // Randomly picking items out of arrays is common, so the PRNG provies a
   // function to do that. `Math.floor()` is used instead of `Math.round()` to
   // avoid a non-uniform distribution of random numbers.
   function pick(array) {
@@ -39,7 +21,6 @@ const PRNG = (function prng() {
 
   return {
     random,
-    shuffle,
     pick,
   };
 }());
@@ -51,23 +32,9 @@ const Board = (function board() {
     return JSON.parse(JSON.stringify({ rows: 3, cols: 3, layout }));
   }
 
-  function canPick(position) {
-    return 'white' === layout[position] || 'black' === layout[position];
-  }
-
-  function canPlay(position) {
-    return '' === layout[position] && 'p' !== position.charAt(0);
-  }
-
-  function valid(start, end) {
-    return canPick(start) && canPlay(end);
-  }
-
   function move(start, end) {
-    if (valid(start, end)) {
-      layout[end] = layout[start];
-      layout[start] = '';
-    }
+    layout[end] = layout[start];
+    layout[start] = '';
   }
 
   function reset() {
@@ -94,7 +61,6 @@ const Board = (function board() {
 
   return {
     get,
-    valid,
     move,
     reset,
   }
@@ -113,19 +79,21 @@ const Rules = (function rules() {
     return results;
   }
 
-  function moves(player, board) {
-    const starting = [];
-    const ending = [];
+  function playable(player, board) {
+    const results = [];
 
     Object.keys(board.layout).forEach((position) => {
-      if (player === board.layout[position]) {
-        starting.push(position);
-      }
       if ('' === board.layout[position]) {
-        ending.push(position);
+        results.push(position);
       }
     });
 
+    return results;
+  }
+
+  function moves(player, board) {
+    const starting = pickable(player, board);
+    const ending = playable(player, board);
     const possible = [];
 
     starting.forEach((start) => {
@@ -208,6 +176,7 @@ const Rules = (function rules() {
 
   return {
     pickable,
+    playable,
     moves,
     winner,
     winning,
@@ -290,12 +259,16 @@ const Stage = (function stage() {
 
     const pickable = Rules.pickable('white', board).indexOf(message) > -1;
 
-    if (!picked && pickable) {
-      picked = message;
+    if (!picked) {
+      if (pickable) {
+        picked = message;
+      }
       return;
     }
 
-    if (!Board.valid(picked, message)) {
+    const playable = Rules.playable('white', board).indexOf(message) > -1;
+
+    if (!playable) {
       if (pickable) {
         picked = message;
       }
@@ -310,7 +283,7 @@ const Stage = (function stage() {
     }
 
     const move = AI.move('black', Board.get());
-    if (move && Board.valid(move[0], move[1])) {
+    if (move) {
       Board.move(move[0], move[1]);
     }
   }
