@@ -87,7 +87,7 @@ avoid a non-uniform distribution of random numbers.</p>
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canPlay</span>(<span class="hljs-params">position</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-string">''</span> === layout[position] &amp;&amp; <span class="hljs-string">'p'</span> !== position.slice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-string">''</span> === layout[position] &amp;&amp; <span class="hljs-string">'p'</span> !== position.charAt(<span class="hljs-number">0</span>);
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">valid</span>(<span class="hljs-params">start, end</span>) </span>{
@@ -145,15 +145,32 @@ avoid a non-uniform distribution of random numbers.</p>
       }
     });
 
-    <span class="hljs-keyword">const</span> results = [];
+    <span class="hljs-keyword">const</span> possible = [];
 
     starting.forEach(<span class="hljs-function">(<span class="hljs-params">start</span>) =&gt;</span> {
       ending.forEach(<span class="hljs-function">(<span class="hljs-params">end</span>) =&gt;</span> {
-        results.push([start, end]);
+        possible.push([start, end]);
       });
-    });
+    });</pre></div>
+        
+      
+        
+        <p>Moves where you return a piece to a starting row are invalid.</p>
 
-    <span class="hljs-keyword">return</span> results;
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> moves = possible.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> <span class="hljs-string">'p'</span> !== move[<span class="hljs-number">1</span>].charAt(<span class="hljs-number">0</span>));</pre></div>
+        
+      
+        
+        <p>Moves from a starting row must be played first.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">const</span> drops = moves.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> <span class="hljs-string">'p'</span> === move[<span class="hljs-number">0</span>].charAt(<span class="hljs-number">0</span>));
+    <span class="hljs-keyword">if</span> (drops.length &gt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">return</span> drops;
+    }
+
+    <span class="hljs-keyword">return</span> moves;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">winner</span>(<span class="hljs-params">board</span>) </span>{
@@ -352,7 +369,7 @@ avoid a non-uniform distribution of random numbers.</p>
       <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">'#'</span>+id);
       <span class="hljs-keyword">if</span> (<span class="hljs-string">''</span> === layout[id]) {
         element.add(<span class="hljs-string">'hole'</span>).remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
-        <span class="hljs-keyword">if</span> (<span class="hljs-string">'p'</span> === id.slice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'p'</span> === id.charAt(<span class="hljs-number">0</span>)) {
           element.remove(<span class="hljs-string">'hole'</span>);
         }
       }

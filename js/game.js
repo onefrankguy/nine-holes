@@ -56,7 +56,7 @@ const Board = (function board() {
   }
 
   function canPlay(position) {
-    return '' === layout[position] && 'p' !== position.slice(0, 1);
+    return '' === layout[position] && 'p' !== position.charAt(0);
   }
 
   function valid(start, end) {
@@ -114,15 +114,24 @@ const Rules = (function rules() {
       }
     });
 
-    const results = [];
+    const possible = [];
 
     starting.forEach((start) => {
       ending.forEach((end) => {
-        results.push([start, end]);
+        possible.push([start, end]);
       });
     });
 
-    return results;
+    // Moves where you return a piece to a starting row are invalid.
+    const moves = possible.filter(move => 'p' !== move[1].charAt(0));
+
+    // Moves from a starting row must be played first.
+    const drops = moves.filter(move => 'p' === move[0].charAt(0));
+    if (drops.length > 0) {
+      return drops;
+    }
+
+    return moves;
   }
 
   function winner(board) {
@@ -300,7 +309,7 @@ const Renderer = (function renderer() {
       const element = $('#'+id);
       if ('' === layout[id]) {
         element.add('hole').remove('white').remove('black');
-        if ('p' === id.slice(0, 1)) {
+        if ('p' === id.charAt(0)) {
           element.remove('hole');
         }
       }
