@@ -65,28 +65,18 @@ const Board = (function board() {
 }());
 
 const Rules = (function rules() {
+  // You can only move your own pieces.
   function pickable(player, board) {
-    const results = [];
-
-    Object.keys(board.layout).forEach((position) => {
-      if (player === board.layout[position]) {
-        results.push(position);
-      }
+    return Object.keys(board.layout).filter((position) => {
+      return board.layout[position] === player;
     });
-
-    return results;
   }
 
+  // You have to move to an empty space that's not the starting row.
   function playable(player, board) {
-    const results = [];
-
-    Object.keys(board.layout).forEach((position) => {
-      if (board.layout[position] === '') {
-        results.push(position);
-      }
+    return Object.keys(board.layout).filter((position) => {
+      return board.layout[position] === '' && position.charAt(0) !== 'p';
     });
-
-    return results;
   }
 
   function moves(player, board) {
@@ -100,16 +90,13 @@ const Rules = (function rules() {
       });
     });
 
-    // Moves where you return a piece to a starting row are invalid.
-    const valid = possible.filter(move => move[1].charAt(0) !== 'p');
-
     // Moves from a starting row must be played first.
-    const drops = valid.filter(move => move[0].charAt(0) === 'p');
+    const drops = possible.filter(move => move[0].charAt(0) === 'p');
     if (drops.length > 0) {
       return drops;
     }
 
-    return valid;
+    return possible;
   }
 
   function winner(board) {
@@ -349,8 +336,8 @@ const Renderer = (function renderer() {
 }());
 
 const Game = (function game() {
-  function onPick() {
-    Renderer.invalidate();
+  function onPick(element) {
+    element.add('picked');
   }
 
   function onPlay(element) {
@@ -358,7 +345,12 @@ const Game = (function game() {
     Renderer.invalidate();
   }
 
-  function onReset() {
+  function onReset(element) {
+    element.add('picked');
+  }
+
+  function offReset(element) {
+    element.remove('picked');
     Board.reset();
     Stage.reset();
     Renderer.invalidate();
@@ -366,10 +358,6 @@ const Game = (function game() {
 
   function play() {
     const $ = window.jQuery;
-    $('#p21').touch(onPick, onPlay);
-    $('#p22').touch(onPick, onPlay);
-    $('#p23').touch(onPick, onPlay);
-
     $('#a3').touch(onPick, onPlay);
     $('#b3').touch(onPick, onPlay);
     $('#c3').touch(onPick, onPlay);
@@ -386,7 +374,7 @@ const Game = (function game() {
     $('#p12').touch(onPick, onPlay);
     $('#p13').touch(onPick, onPlay);
 
-    $('#reset').touch(undefined, onReset);
+    $('#reset').touch(onReset, offReset);
 
     Board.reset();
     Stage.reset();

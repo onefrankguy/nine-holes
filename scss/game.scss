@@ -56,6 +56,21 @@ a, a:visited {
   justify-content: space-evenly;
 }
 
+/* FEEDBACK */
+.pickable.button {
+  box-shadow: .2rem .2rem .5rem rgba(0,0,0,.3);
+}
+
+.space.white.pickable:after {
+  text-shadow: .2rem .2rem .5rem rgba(0,0,0,.3);
+}
+
+.picked,
+.picked:after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
 /* BOARD */
 $hole-size: ($font-size * 4);
 
@@ -85,10 +100,6 @@ $hole-size: ($font-size * 4);
 .space.black:after {
   content: '\02299';
   font-size: ($font-size * 4);
-}
-
-.picked {
-  color: gray;
 }
 
 /* STATS */
