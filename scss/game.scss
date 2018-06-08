@@ -61,14 +61,9 @@ a, a:visited {
   box-shadow: .2rem .2rem .5rem rgba(0,0,0,.3);
 }
 
-.space.white.pickable:after {
-  text-shadow: .2rem .2rem .5rem rgba(0,0,0,.3);
-}
-
 .picked,
 .picked:after {
   box-shadow: none !important;
-  text-shadow: none !important;
 }
 
 /* BOARD */
@@ -92,14 +87,40 @@ $hole-size: ($font-size * 4);
   border-left: 1px solid black;
 }
 
+.space.black,
+.space.white {
+  position: relative;
+}
+
+.space.black:before,
+.space.white:before {
+  content: '';
+  width: ($font-size / 2);
+  height: ($font-size / 2);
+  background: black;
+  position: absolute;
+  left: (($hole-size / 2) - ($font-size / 4));
+  top: (($hole-size / 2) - ($font-size / 4));
+}
+
+.space.black:before {
+  border-radius: 50%;
+}
+
+.space.white:after,
+.space.black:after {
+  content: '';
+  border: .4rem solid black;
+  width: ($hole-size / 2);
+  height: ($hole-size / 2);
+}
+
 .space.white:after {
-  content: '\022A1';
-  font-size: ($font-size * 4);
+  box-shadow: .2rem .2rem .5rem rgba(0,0,0,.3);
 }
 
 .space.black:after {
-  content: '\02299';
-  font-size: ($font-size * 4);
+  border-radius: 50%;
 }
 
 /* STATS */
