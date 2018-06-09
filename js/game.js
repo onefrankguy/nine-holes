@@ -19,7 +19,7 @@
 // moved after they're played.
 //
 // So how do we make that into a video game? Well, let's start with a board.
-let Board = {};
+const Board = {};
 
 // <style>
 // td {
@@ -156,7 +156,7 @@ Board.move = (board, moves) => {
 // how it's displayed, we also don't want it to know or care about rules. We'll
 // figure those out next.
 
-let Rules = {};
+const Rules = {};
 
 // You can move your own pieces.
 
@@ -172,7 +172,7 @@ Rules.starting = (board) => {
   return spaces.filter(space => space.charAt(1) === '1' || space.charAt(1) === '5');
 };
 
-Rules.playable = (board, player) => {
+Rules.playable = (board) => {
   const spaces = Object.keys(board.layout);
   const empty = spaces.filter(space => board.layout[space] === '');
 
@@ -185,7 +185,7 @@ Rules.playable = (board, player) => {
 
 Rules.moves = (board, player) => {
   const pickable = Rules.pickable(board, player);
-  const playable = Rules.playable(board, player);
+  const playable = Rules.playable(board);
   const moves = [];
 
   pickable.forEach((start) => {
@@ -287,17 +287,13 @@ Rules.winner = (board) => {
 // ---
 //
 // Let's write an AI.
-let AI = {};
-
-// Our AI needs to know who it's playing as and who it's playing against.
-AI.opponent = (player) => {
-  return player === 'x' ? 'y' : 'x';
-};
+const AI = {};
 
 // Our AI can use the rules to find all the winning moves available to it.
 
 AI.winning = (board, player) => {
-  return Rules.moves(board, player).filter((move) => {
+  const moves = Rules.moves(board, player);
+  return moves.filter((move) => {
     const test = Board.move(board, [move]);
     return Rules.winner(test) === player;
   });
@@ -309,7 +305,7 @@ AI.winning = (board, player) => {
 // a blocking move.
 
 AI.blocking = (board, player) => {
-  const opponent = AI.opponent(player);
+  const opponent = player === 'x' ? 'y' : 'x';
   const winning = AI.winning(board, opponent).map(move => move.slice(3));
   const blocking = Rules.moves(board, player);
   return blocking.filter(move => winning.indexOf(move.slice(3)) > -1);
@@ -336,7 +332,7 @@ AI.moves = (board, player) => {
 // Because our AI is stateless, and all its functions take a `player` argument,
 // it can play our game against itself.
 //
-//```
+// ```
 // (function testAI() {
 //   let board = Board.create();
 //   let winner;
@@ -357,7 +353,7 @@ AI.moves = (board, player) => {
 //
 //   console.log(`${winner} wins!`);
 // }());
-//```
+// ```
 
 const Stage = (function stage() {
   let board = Board.create();
@@ -386,7 +382,7 @@ const Stage = (function stage() {
       return;
     }
 
-    const playable = Rules.playable(board, 'x').indexOf(message) > -1;
+    const playable = Rules.playable(board).indexOf(message) > -1;
 
     if (!playable) {
       if (pickable) {

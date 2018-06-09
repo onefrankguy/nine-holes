@@ -40,7 +40,7 @@ moved after they’re played.</p>
 <p>So how do we make that into a video game? Well, let’s start with a board.</p>
 
         
-          <div class='highlight'><pre><span class="hljs-keyword">let</span> Board = {};</pre></div>
+          <div class='highlight'><pre><span class="hljs-keyword">const</span> Board = {};</pre></div>
         
       
         
@@ -182,7 +182,7 @@ figure those out next.</p>
 
         
           <div class='highlight'><pre>
-<span class="hljs-keyword">let</span> Rules = {};</pre></div>
+<span class="hljs-keyword">const</span> Rules = {};</pre></div>
         
       
         
@@ -206,7 +206,7 @@ Rules.starting = <span class="hljs-function">(<span class="hljs-params">board</s
   <span class="hljs-keyword">return</span> spaces.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> space.charAt(<span class="hljs-number">1</span>) === <span class="hljs-string">'1'</span> || space.charAt(<span class="hljs-number">1</span>) === <span class="hljs-string">'5'</span>);
 };
 
-Rules.playable = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+Rules.playable = <span class="hljs-function">(<span class="hljs-params">board</span>) =&gt;</span> {
   <span class="hljs-keyword">const</span> spaces = <span class="hljs-built_in">Object</span>.keys(board.layout);
   <span class="hljs-keyword">const</span> empty = spaces.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> board.layout[space] === <span class="hljs-string">''</span>);
 
@@ -223,7 +223,7 @@ into, is an allowed move.</p>
           <div class='highlight'><pre>
 Rules.moves = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
   <span class="hljs-keyword">const</span> pickable = Rules.pickable(board, player);
-  <span class="hljs-keyword">const</span> playable = Rules.playable(board, player);
+  <span class="hljs-keyword">const</span> playable = Rules.playable(board);
   <span class="hljs-keyword">const</span> moves = [];
 
   pickable.forEach(<span class="hljs-function">(<span class="hljs-params">start</span>) =&gt;</span> {
@@ -327,16 +327,7 @@ playing it. To do that, we’ll need an oppontent.</p>
         <p>Let’s write an AI.</p>
 
         
-          <div class='highlight'><pre><span class="hljs-keyword">let</span> AI = {};</pre></div>
-        
-      
-        
-        <p>Our AI needs to know who it’s playing as and who it’s playing against.</p>
-
-        
-          <div class='highlight'><pre>AI.opponent = <span class="hljs-function">(<span class="hljs-params">player</span>) =&gt;</span> {
-  <span class="hljs-keyword">return</span> player === <span class="hljs-string">'x'</span> ? <span class="hljs-string">'y'</span> : <span class="hljs-string">'x'</span>;
-};</pre></div>
+          <div class='highlight'><pre><span class="hljs-keyword">const</span> AI = {};</pre></div>
         
       
         
@@ -345,7 +336,8 @@ playing it. To do that, we’ll need an oppontent.</p>
         
           <div class='highlight'><pre>
 AI.winning = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
-  <span class="hljs-keyword">return</span> Rules.moves(board, player).filter(<span class="hljs-function">(<span class="hljs-params">move</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> moves = Rules.moves(board, player);
+  <span class="hljs-keyword">return</span> moves.filter(<span class="hljs-function">(<span class="hljs-params">move</span>) =&gt;</span> {
     <span class="hljs-keyword">const</span> test = Board.move(board, [move]);
     <span class="hljs-keyword">return</span> Rules.winner(test) === player;
   });
@@ -361,7 +353,7 @@ a blocking move.</p>
         
           <div class='highlight'><pre>
 AI.blocking = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
-  <span class="hljs-keyword">const</span> opponent = AI.opponent(player);
+  <span class="hljs-keyword">const</span> opponent = player === <span class="hljs-string">'x'</span> ? <span class="hljs-string">'y'</span> : <span class="hljs-string">'x'</span>;
   <span class="hljs-keyword">const</span> winning = AI.winning(board, opponent).map(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move.slice(<span class="hljs-number">3</span>));
   <span class="hljs-keyword">const</span> blocking = Rules.moves(board, player);
   <span class="hljs-keyword">return</span> blocking.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> winning.indexOf(move.slice(<span class="hljs-number">3</span>)) &gt; <span class="hljs-number">-1</span>);
@@ -443,7 +435,7 @@ it can play our game against itself.</p>
       <span class="hljs-keyword">return</span>;
     }
 
-    <span class="hljs-keyword">const</span> playable = Rules.playable(board, <span class="hljs-string">'x'</span>).indexOf(message) &gt; <span class="hljs-number">-1</span>;
+    <span class="hljs-keyword">const</span> playable = Rules.playable(board).indexOf(message) &gt; <span class="hljs-number">-1</span>;
 
     <span class="hljs-keyword">if</span> (!playable) {
       <span class="hljs-keyword">if</span> (pickable) {
