@@ -282,11 +282,78 @@ Rules.winner = (board) => {
 // There are other edge cases we could cover, like three in a row vertically
 // where one of the pieces is in a starting space. But the goal here isn't
 // exhaustive test coverage. Often the best way to test a game is to start
-// playing it. To do that, we'll need an oppontent. But before we write an AI,
-// we'll detour slightly and talk about randomness.
+// playing it. To do that, we'll need an oppontent.
 //
 // ---
 //
+// Let's write an AI.
+let AI = {};
+
+// Our AI can use the rules to find all the winning moves available to it.
+
+AI.winning = (board, player) => {
+  return Rules.moves(board, player).filter((move) => {
+    const test = Board.move(board, [move]);
+    return Rules.winner(test) === player;
+  });
+};
+
+// Our AI can also use the rules to find all the blocking moves available to it.
+// Assume it's the other player's turn. What move would they make to win? If the
+// AI can find a move it can make that puts its piece in the same space, that's
+// a blocking move.
+
+AI.blocking = (board, player) => {
+  const oponent = player === 'x' ? 'y' : 'x';
+  const winning = AI.winning(board, oponent).map(move => move.slice(3));
+  const blocking = Rules.moves(board, player);
+  return blocking.filter(move => winning.indexOf(move.slice(3)) > -1);
+};
+
+// Our AI is simple. It plays a winning move if it sees one. Otherwise it plays
+// a blocking move. If it doesn't see any winning or blocking moves, it plays a
+// legal move.
+
+AI.moves = (board, player) => {
+  const winning = AI.winning(board, player);
+  if (winning.length > 0) {
+    return winning;
+  }
+
+  const blocking = AI.blocking(board, player);
+  if (blocking.length > 0) {
+    return blocking;
+  }
+
+  return Rules.moves(board, player);
+};
+
+// Because our AI is stateless, and all its functions take a `player` argument,
+// it can play our game against itself.
+//
+//```
+// (function testAI() {
+//   let board = Board.create();
+//   let winner;
+//
+//   function play(board, player) {
+//     console.log(`${player} is playing on ${JSON.stringify(board.layout)}`);
+//     const moves = AI.moves(board, player);
+//     const index = Math.floor(Math.random() * moves.length);
+//     console.log(`${player} plays`, moves[index]);
+//     return Board.move(board, [moves[index]]);
+//   }
+//
+//   while (!winner) {
+//     board = play(board, 'x');
+//     board = play(board, 'y');
+//     winner = Rules.winner(board);
+//   }
+//
+//   console.log(`${winner} wins!`);
+// }());
+//```
+
 // Random number generators are useful in games. Dice and decks of cards are
 // common in physical games, but video games use mathematical functions. This
 // one is described in the paper, _A New Class of Invertible Mappings_,
@@ -457,7 +524,7 @@ Rules = (function rules() {
   };
 }());
 
-const AI = (function ai() {
+AI = (function ai() {
   function players(board) {
     const results = new Set(Object.values(board.layout));
     results.delete('');

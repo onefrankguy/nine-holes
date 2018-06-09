@@ -318,10 +318,93 @@ copies of the ranks and files from the board without changing it.</p>
 </code></pre><p>There are other edge cases we could cover, like three in a row vertically
 where one of the pieces is in a starting space. But the goal here isn’t
 exhaustive test coverage. Often the best way to test a game is to start
-playing it. To do that, we’ll need an oppontent. But before we write an AI,
-we’ll detour slightly and talk about randomness.</p>
+playing it. To do that, we’ll need an oppontent.</p>
 <hr>
 
+        
+      
+        
+        <p>Let’s write an AI.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">let</span> AI = {};</pre></div>
+        
+      
+        
+        <p>Our AI can use the rules to find all the winning moves available to it.</p>
+
+        
+          <div class='highlight'><pre>
+AI.winning = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> Rules.moves(board, player).filter(<span class="hljs-function">(<span class="hljs-params">move</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> test = Board.move(board, [move]);
+    <span class="hljs-keyword">return</span> Rules.winner(test) === player;
+  });
+};</pre></div>
+        
+      
+        
+        <p>Our AI can also use the rules to find all the blocking moves available to it.
+Assume it’s the other player’s turn. What move would they make to win? If the
+AI can find a move it can make that puts its piece in the same space, that’s
+a blocking move.</p>
+
+        
+          <div class='highlight'><pre>
+AI.blocking = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> oponent = player === <span class="hljs-string">'x'</span> ? <span class="hljs-string">'y'</span> : <span class="hljs-string">'x'</span>;
+  <span class="hljs-keyword">const</span> winning = AI.winning(board, oponent).map(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move.slice(<span class="hljs-number">3</span>));
+  <span class="hljs-keyword">const</span> blocking = Rules.moves(board, player);
+  <span class="hljs-keyword">return</span> blocking.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> winning.indexOf(move.slice(<span class="hljs-number">3</span>)) &gt; <span class="hljs-number">-1</span>);
+};</pre></div>
+        
+      
+        
+        <p>Our AI is simple. It plays a winning move if it sees one. Otherwise it plays
+a blocking move. If it doesn’t see any winning or blocking moves, it plays a
+legal move.</p>
+
+        
+          <div class='highlight'><pre>
+AI.moves = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> winning = AI.winning(board, player);
+  <span class="hljs-keyword">if</span> (winning.length &gt; <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> winning;
+  }
+
+  <span class="hljs-keyword">const</span> blocking = AI.blocking(board, player);
+  <span class="hljs-keyword">if</span> (blocking.length &gt; <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> blocking;
+  }
+
+  <span class="hljs-keyword">return</span> Rules.moves(board, player);
+};</pre></div>
+        
+      
+        
+        <p>Because our AI is stateless, and all its functions take a <code>player</code> argument,
+it can play our game against itself.</p>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testAI</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">let</span> board = Board.create();
+  <span class="hljs-keyword">let</span> winner;
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params">board, player</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${player}</span> is playing on <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(board.layout)}</span>`</span>);
+    <span class="hljs-keyword">const</span> moves = AI.moves(board, player);
+    <span class="hljs-keyword">const</span> index = <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * moves.length);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${player}</span> plays`</span>, moves[index]);
+    <span class="hljs-keyword">return</span> Board.move(board, [moves[index]]);
+  }
+
+  <span class="hljs-keyword">while</span> (!winner) {
+    board = play(board, <span class="hljs-string">'x'</span>);
+    board = play(board, <span class="hljs-string">'y'</span>);
+    winner = Rules.winner(board);
+  }
+
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${winner}</span> wins!`</span>);
+}());
+</code></pre>
         
       
         
@@ -514,7 +597,7 @@ Rules = (<span class="hljs-function"><span class="hljs-keyword">function</span> 
   };
 }());
 
-<span class="hljs-keyword">const</span> AI = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ai</span>(<span class="hljs-params"></span>) </span>{
+AI = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ai</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">players</span>(<span class="hljs-params">board</span>) </span>{
     <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(<span class="hljs-built_in">Object</span>.values(board.layout));
     results.delete(<span class="hljs-string">''</span>);
