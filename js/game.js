@@ -1,3 +1,154 @@
+// How do you make a video game?
+//
+// When I created [Prolix][], I didn't know what I was doing. I had a basic
+// understanding of web design, but I didn't know JavaScript. What I wanted was
+// a video game built on open web standards. Something where I could read the
+// code and understand it and change the rules and make it my own.
+//
+// This is that game.
+//
+//
+// [Prolix]: http://prolix-app.com/ "Prolix is a word search game for the iPhone and iPod touch which lets you tweet your scores so your friends can play with you."
+//
+// ---
+//
+// **Nine Holes** is an old two-player game. It's played on a 3 x 3 board and
+// is reminiscent of tic-tac-toe. Players have three pieces each. They take
+// turns putting them on the board, and the winner is first to get three in
+// a row. Unlike tic-tac-toe, diagonals don't count for a win, and pieces can be
+// moved after they're played.
+//
+// So how do we make that into a video game? Well, let's start with a board.
+let Board = {};
+
+// <style>
+// td {
+//   font: 1rem/1 sans-serif;
+//   width: 1.8rem;
+//   height: 1.8rem;
+//   border: 1px solid gray;
+//   text-align: center;
+// }
+// td.label {
+//   border: none;
+// }
+// </style>
+
+
+// When talking about board games, it's useful to be able to describe both the
+// players and the moves they make in shorthand. Chess notation used numbers for
+// ranks (rows) and letters for files (columns). So we can draw a 3 x 3 board
+// like this:
+//
+// <table>
+// <tr><td class="label">3</td><td></td><td></td><td></td></tr>
+// <tr><td class="label">2</td><td></td><td></td><td></td></tr>
+// <tr><td class="label">1</td><td></td><td></td><td></td></tr>
+// <tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
+// </table>
+//
+// We can reference any space on our board as a letter and number. So "a1" is
+// the space in the lower left corner, and "c3" is the space in the upper right
+// corner.
+//
+// Since we used "a" and "b" as column labels, so we'll use X and Y for the
+// players. In our game, players don't start with pieces on the board. But in
+// other games, like Checkers, they do. Let's extend our board slightly so it
+// has starting spaces for the pieces.
+//
+// <table>
+// <tr><td class="label">5</td><td>y</td><td>y</td><td>y</td></tr>
+// <tr><td class="label">4</td><td></td><td></td><td></td></tr>
+// <tr><td class="label">3</td><td></td><td></td><td></td></tr>
+// <tr><td class="label">2</td><td></td><td></td><td></td></tr>
+// <tr><td class="label">1</td><td>x</td><td>x</td><td>x</td></tr>
+// <tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
+// </table>
+//
+// Every time we start a new game, that's what we want the board to look like.
+// So let's give ourselves a way to create new game boards.
+
+Board.create = () => {
+  const files = ['a', 'b', 'c'];
+  const ranks = ['1', '2', '3', '4', '5'];
+
+  const layout = {};
+
+  files.forEach((file) => {
+    ranks.forEach((rank) => {
+      layout[file + rank] = '';
+    });
+  });
+
+  files.forEach((file) => {
+    layout[`${file}1`] = 'x';
+    layout[`${file}5`] = 'y';
+  });
+
+  return {
+    files,
+    ranks,
+    layout,
+  };
+};
+
+// The `Board.create` function returns everything we need to draw a picture of
+// the game. The board shouldn't know or care how it's rendered. For all it
+// knows, we could be playing this game on a terminal and drawing it out in
+// ASCII text.
+
+// Now that we can draw the board, we need a way to move pieces around it. If X
+// starts by moving from a1 to c4, we can write that as "a1-c4". If Y responds
+// by moving b5 to b4, we can write that as "b5-a4". We can keep both those
+// moves in a list, `["a1-c4", "b5-a4"]`, and give ourselves a way to make them.
+
+Board.move = (board, moves) => {
+  const copy = JSON.parse(JSON.stringify(board));
+
+  moves.forEach((move) => {
+    const [start, end] = move.split('-');
+    copy.layout[end] = copy.layout[start];
+    copy.layout[start] = '';
+  });
+
+  return copy;
+};
+
+// The `Board.move` function uses `JSON.stringify` and `JSON.parse` to make a
+// deep copy of a boad before updating it. This keeps the function pure. The
+// same board and the same moves always give the same output. Pure functions
+// are easier to debug than functions that mutate state, so we'll try to write
+// as many of them as we can.
+//
+// We now have enough code to run a tiny test. We'll create a new board, make
+// two moves on it, and see how the board changes.
+//
+// ```
+// const starting = Board.create();
+// console.log(starting.layout);
+// const playing = Board.move(starting, ['a1-c4', 'b5-a4']);
+// console.log(playing.layout);
+// ```
+//
+// Here's the board after those two moves:
+//
+// <table>
+// <tr><td class="label">5</td><td>y</td><td></td><td>y</td></tr>
+// <tr><td class="label">4</td><td>y</td><td></td><td>x</td></tr>
+// <tr><td class="label">3</td><td></td><td></td><td></td></tr>
+// <tr><td class="label">2</td><td></td><td></td><td></td></tr>
+// <tr><td class="label">1</td><td></td><td>x</td><td>x</td></tr>
+// <tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
+// </table>
+//
+// What's the next move? X could play "b1-b4" and try to stack pieces on top of
+// each other. That would be illegal, but the `Board.move` function doesn't know
+// the rules of the game. Just like how we don't want the board to know or care
+// how it's displayed, we also don't want it to know or care about rules. We'll
+// figure those out next.
+//
+// ---
+//
 // Random number generators are useful in games. Dice and decks of cards are
 // common in physical games, but video games use mathematical functions. This
 // one is described in the paper, _A New Class of Invertible Mappings_,
@@ -25,7 +176,7 @@ const PRNG = (function prng() {
   };
 }());
 
-const Board = (function board() {
+Board = (function board() {
   let layout = {};
 
   function get() {

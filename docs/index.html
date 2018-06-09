@@ -21,6 +21,163 @@
 
       
         
+        <p>How do you make a video game?</p>
+<p>When I created <a href="http://prolix-app.com/" title="Prolix is a word search game for the iPhone and iPod touch which lets you tweet your scores so your friends can play with you.">Prolix</a>, I didn’t know what I was doing. I had a basic
+understanding of web design, but I didn’t know JavaScript. What I wanted was
+a video game built on open web standards. Something where I could read the
+code and understand it and change the rules and make it my own.</p>
+<p>This is that game.</p>
+<hr>
+
+        
+      
+        
+        <p><strong>Nine Holes</strong> is an old two-player game. It’s played on a 3 x 3 board and
+is reminiscent of tic-tac-toe. Players have three pieces each. They take
+turns putting them on the board, and the winner is first to get three in
+a row. Unlike tic-tac-toe, diagonals don’t count for a win, and pieces can be
+moved after they’re played.</p>
+<p>So how do we make that into a video game? Well, let’s start with a board.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">let</span> Board = {};</pre></div>
+        
+      
+        
+        <style>
+td {
+  font: 1rem/1 sans-serif;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid gray;
+  text-align: center;
+}
+td.label {
+  border: none;
+}
+</style>
+
+        
+      
+        
+        <p>When talking about board games, it’s useful to be able to describe both the
+players and the moves they make in shorthand. Chess notation used numbers for
+ranks (rows) and letters for files (columns). So we can draw a 3 x 3 board
+like this:</p>
+<table>
+<tr><td class="label">3</td><td></td><td></td><td></td></tr>
+<tr><td class="label">2</td><td></td><td></td><td></td></tr>
+<tr><td class="label">1</td><td></td><td></td><td></td></tr>
+<tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
+</table>
+
+<p>We can reference any space on our board as a letter and number. So “a1” is
+the space in the lower left corner, and “c3” is the space in the upper right
+corner.</p>
+<p>Since we used “a” and “b” as column labels, so we’ll use X and Y for the
+players. In our game, players don’t start with pieces on the board. But in
+other games, like Checkers, they do. Let’s extend our board slightly so it
+has starting spaces for the pieces.</p>
+<table>
+<tr><td class="label">5</td><td>y</td><td>y</td><td>y</td></tr>
+<tr><td class="label">4</td><td></td><td></td><td></td></tr>
+<tr><td class="label">3</td><td></td><td></td><td></td></tr>
+<tr><td class="label">2</td><td></td><td></td><td></td></tr>
+<tr><td class="label">1</td><td>x</td><td>x</td><td>x</td></tr>
+<tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
+</table>
+
+<p>Every time we start a new game, that’s what we want the board to look like.
+So let’s give ourselves a way to create new game boards.</p>
+
+        
+          <div class='highlight'><pre>
+Board.create = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> files = [<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>];
+  <span class="hljs-keyword">const</span> ranks = [<span class="hljs-string">'1'</span>, <span class="hljs-string">'2'</span>, <span class="hljs-string">'3'</span>, <span class="hljs-string">'4'</span>, <span class="hljs-string">'5'</span>];
+
+  <span class="hljs-keyword">const</span> layout = {};
+
+  files.forEach(<span class="hljs-function">(<span class="hljs-params">file</span>) =&gt;</span> {
+    ranks.forEach(<span class="hljs-function">(<span class="hljs-params">rank</span>) =&gt;</span> {
+      layout[file + rank] = <span class="hljs-string">''</span>;
+    });
+  });
+
+  files.forEach(<span class="hljs-function">(<span class="hljs-params">file</span>) =&gt;</span> {
+    layout[<span class="hljs-string">`<span class="hljs-subst">${file}</span>1`</span>] = <span class="hljs-string">'x'</span>;
+    layout[<span class="hljs-string">`<span class="hljs-subst">${file}</span>5`</span>] = <span class="hljs-string">'y'</span>;
+  });
+
+  <span class="hljs-keyword">return</span> {
+    files,
+    ranks,
+    layout,
+  };
+};</pre></div>
+        
+      
+        
+        <p>The <code>Board.create</code> function returns everything we need to draw a picture of
+the game. The board shouldn’t know or care how it’s rendered. For all it
+knows, we could be playing this game on a terminal and drawing it out in
+ASCII text.</p>
+
+        
+      
+        
+        <p>Now that we can draw the board, we need a way to move pieces around it. If X
+starts by moving from a1 to c4, we can write that as “a1-c4”. If Y responds
+by moving b5 to b4, we can write that as “b5-a4”. We can keep both those
+moves in a list, <code>[&quot;a1-c4&quot;, &quot;b5-a4&quot;]</code>, and give ourselves a way to make them.</p>
+
+        
+          <div class='highlight'><pre>
+Board.move = <span class="hljs-function">(<span class="hljs-params">board, moves</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> copy = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify(board));
+
+  moves.forEach(<span class="hljs-function">(<span class="hljs-params">move</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> [start, end] = move.split(<span class="hljs-string">'-'</span>);
+    copy.layout[end] = copy.layout[start];
+    copy.layout[start] = <span class="hljs-string">''</span>;
+  });
+
+  <span class="hljs-keyword">return</span> copy;
+};</pre></div>
+        
+      
+        
+        <p>The <code>Board.move</code> function uses <code>JSON.stringify</code> and <code>JSON.parse</code> to make a
+deep copy of a boad before updating it. This keeps the function pure. The
+same board and the same moves always give the same output. Pure functions
+are easier to debug than functions that mutate state, so we’ll try to write
+as many of them as we can.</p>
+<p>We now have enough code to run a tiny test. We’ll create a new board, make
+two moves on it, and see how the board changes.</p>
+<pre><code><span class="hljs-keyword">const</span> starting = Board.create();
+<span class="hljs-built_in">console</span>.log(starting.layout);
+<span class="hljs-keyword">const</span> playing = Board.move(starting, [<span class="hljs-string">'a1-c4'</span>, <span class="hljs-string">'b5-a4'</span>]);
+<span class="hljs-built_in">console</span>.log(playing.layout);
+</code></pre><p>Here’s the board after those two moves:</p>
+<table>
+<tr><td class="label">5</td><td>y</td><td></td><td>y</td></tr>
+<tr><td class="label">4</td><td>y</td><td></td><td>x</td></tr>
+<tr><td class="label">3</td><td></td><td></td><td></td></tr>
+<tr><td class="label">2</td><td></td><td></td><td></td></tr>
+<tr><td class="label">1</td><td></td><td>x</td><td>x</td></tr>
+<tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
+</table>
+
+<p>What’s the next move? X could play “b1-b4” and try to stack pieces on top of
+each other. That would be illegal, but the <code>Board.move</code> function doesn’t know
+the rules of the game. Just like how we don’t want the board to know or care
+how it’s displayed, we also don’t want it to know or care about rules. We’ll
+figure those out next.</p>
+<hr>
+
+        
+      
+        
         <p>Random number generators are useful in games. Dice and decks of cards are
 common in physical games, but video games use mathematical functions. This
 one is described in the paper, <em>A New Class of Invertible Mappings</em>,
@@ -54,7 +211,7 @@ avoid a non-uniform distribution of random numbers.</p>
   };
 }());
 
-<span class="hljs-keyword">const</span> Board = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">board</span>(<span class="hljs-params"></span>) </span>{
+Board = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">board</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> layout = {};
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
