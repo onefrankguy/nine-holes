@@ -289,6 +289,11 @@ Rules.winner = (board) => {
 // Let's write an AI.
 let AI = {};
 
+// Our AI needs to know who it's playing as and who it's playing against.
+AI.opponent = (player) => {
+  return player === 'x' ? 'y' : 'x';
+};
+
 // Our AI can use the rules to find all the winning moves available to it.
 
 AI.winning = (board, player) => {
@@ -304,8 +309,8 @@ AI.winning = (board, player) => {
 // a blocking move.
 
 AI.blocking = (board, player) => {
-  const oponent = player === 'x' ? 'y' : 'x';
-  const winning = AI.winning(board, oponent).map(move => move.slice(3));
+  const opponent = AI.opponent(player);
+  const winning = AI.winning(board, opponent).map(move => move.slice(3));
   const blocking = Rules.moves(board, player);
   return blocking.filter(move => winning.indexOf(move.slice(3)) > -1);
 };
@@ -354,251 +359,25 @@ AI.moves = (board, player) => {
 // }());
 //```
 
-// Random number generators are useful in games. Dice and decks of cards are
-// common in physical games, but video games use mathematical functions. This
-// one is described in the paper, _A New Class of Invertible Mappings_,
-// by Alexander Klimov and Adi Shamer.
-const PRNG = (function prng() {
-  const max = 2 ** 32;
-  let state = Math.floor(Math.random() * max);
-
-  function random() {
-    state += (state * state) | 5;
-    return (state >>> 32) / max;
-  }
-
-  // Randomly picking items out of arrays is common, so the PRNG provies a
-  // function to do that. `Math.floor()` is used instead of `Math.round()` to
-  // avoid a non-uniform distribution of random numbers.
-  function pick(array) {
-    const index = Math.floor(random() * array.length);
-    return array[index];
-  }
-
-  return {
-    random,
-    pick,
-  };
-}());
-
-Board = (function board() {
-  let layout = {};
-
-  function get() {
-    return JSON.parse(JSON.stringify({ rows: 3, cols: 3, layout }));
-  }
-
-  function move(start, end) {
-    layout[end] = layout[start];
-    layout[start] = '';
-  }
-
-  function reset() {
-    layout = {
-      p21: 'black',
-      p22: 'black',
-      p23: 'black',
-      a3: '',
-      b3: '',
-      c3: '',
-      a2: '',
-      b2: '',
-      c2: '',
-      a1: '',
-      b1: '',
-      c1: '',
-      p11: 'white',
-      p12: 'white',
-      p13: 'white',
-    };
-  }
-
-  return {
-    get,
-    move,
-    reset,
-  };
-}());
-
-Rules = (function rules() {
-  // You can only move your own pieces.
-  function pickable(player, board) {
-    return Object.keys(board.layout).filter((position) => {
-      return board.layout[position] === player;
-    });
-  }
-
-  // You have to move to an empty space that's not the starting row.
-  function playable(player, board) {
-    return Object.keys(board.layout).filter((position) => {
-      return board.layout[position] === '' && position.charAt(0) !== 'p';
-    });
-  }
-
-  function moves(player, board) {
-    const starting = pickable(player, board);
-    const ending = playable(player, board);
-    const possible = [];
-
-    starting.forEach((start) => {
-      ending.forEach((end) => {
-        possible.push([start, end]);
-      });
-    });
-
-    // Moves from a starting row must be played first.
-    const drops = possible.filter(move => move[0].charAt(0) === 'p');
-    if (drops.length > 0) {
-      return drops;
-    }
-
-    return possible;
-  }
-
-  function winner(board) {
-    const rows = [];
-    const cols = [];
-
-    for (let i = 0; i < board.rows; i += 1) {
-      rows.push(String.fromCharCode(97 + i));
-    }
-
-    for (let i = 0; i < board.cols; i += 1) {
-      cols.push(`${i + 1}`);
-    }
-
-    let result;
-
-    rows.forEach((row) => {
-      if (!result) {
-        const players = [];
-
-        cols.forEach((col) => {
-          players.push(board.layout[row + col]);
-        });
-
-        if (new Set(players).size === 1 && players[0] !== '') {
-          [result] = players;
-        }
-      }
-    });
-
-    cols.forEach((col) => {
-      if (!result) {
-        const players = [];
-
-        rows.forEach((row) => {
-          players.push(board.layout[row + col]);
-        });
-
-        if (new Set(players).size === 1 && players[0] !== '') {
-          [result] = players;
-        }
-      }
-    });
-
-    return result;
-  }
-
-  function winning(player, board) {
-    const results = [];
-
-    moves(player, board).forEach((move) => {
-      const test = JSON.parse(JSON.stringify(board));
-      test.layout[move[1]] = test.layout[move[0]];
-      test.layout[move[0]] = '';
-      if (player === winner(test)) {
-        results.push(move);
-      }
-    });
-
-    return results;
-  }
-
-  return {
-    pickable,
-    playable,
-    moves,
-    winner,
-    winning,
-  };
-}());
-
-AI = (function ai() {
-  function players(board) {
-    const results = new Set(Object.values(board.layout));
-    results.delete('');
-    return results;
-  }
-
-  function difference(a, b) {
-    const result = new Set(a);
-    b.forEach((item) => {
-      result.delete(item);
-    });
-    return result;
-  }
-
-  function move(player, board) {
-    // Figure out who we're playing against.
-    const player1 = player;
-    const player2 = [...difference(players(board), [player])][0];
-
-    // Figure out what moves we can play.
-    const p1moves = Rules.moves(player1, board);
-
-    // Play a winning move if we have one.
-    const p1wins = Rules.winning(player1, board);
-    if (p1wins.length > 0) {
-      return PRNG.pick(p1wins);
-    }
-
-    // Play a blocking move if we have one.
-    const p2wins = Rules.winning(player2, board);
-    if (p2wins.length > 0) {
-      const p1blocks = [];
-
-      p2wins.forEach((p2move) => {
-        p1moves.forEach((p1move) => {
-          if (p2move[1] === p1move[1]) {
-            p1blocks.push(p1move);
-          }
-        });
-      });
-
-      if (p1blocks.length > 0) {
-        return PRNG.pick(p1blocks);
-      }
-    }
-
-    // Play a random move.
-    return PRNG.pick(p1moves);
-  }
-
-  return {
-    move,
-  };
-}());
-
 const Stage = (function stage() {
+  let board = Board.create();
   let picked;
 
   function get() {
-    return picked;
+    return JSON.parse(JSON.stringify({ board, picked }));
   }
 
   function reset() {
+    board = Board.create();
     picked = undefined;
   }
 
   function next(message) {
-    const board = Board.get();
-
     if (Rules.winner(board)) {
       return;
     }
 
-    const pickable = Rules.pickable('white', board).indexOf(message) > -1;
+    const pickable = Rules.pickable(board, 'x').indexOf(message) > -1;
 
     if (!picked) {
       if (pickable) {
@@ -607,7 +386,7 @@ const Stage = (function stage() {
       return;
     }
 
-    const playable = Rules.playable('white', board).indexOf(message) > -1;
+    const playable = Rules.playable(board, 'x').indexOf(message) > -1;
 
     if (!playable) {
       if (pickable) {
@@ -616,16 +395,17 @@ const Stage = (function stage() {
       return;
     }
 
-    Board.move(picked, message);
+    board = Board.move(board, [`${picked}-${message}`]);
     picked = undefined;
 
-    if (Rules.winner(Board.get()) === 'white') {
+    if (Rules.winner(board) === 'x') {
       return;
     }
 
-    const move = AI.move('black', Board.get());
-    if (move) {
-      Board.move(move[0], move[1]);
+    const moves = AI.moves(board, 'y');
+    if (moves.length > 0) {
+      const index = Math.floor(Math.random() * moves.length);
+      board = Board.move(board, [moves[index]]);
     }
   }
 
@@ -641,17 +421,17 @@ const Renderer = (function renderer() {
 
   function renderBoard() {
     const $ = window.jQuery;
-    const { layout } = Board.get();
+    const { layout } = Stage.get().board;
 
     Object.keys(layout).forEach((id) => {
       const element = $(`#${id}`);
       if (layout[id] === '') {
         element.remove('white').remove('black');
       }
-      if (layout[id] === 'white') {
+      if (layout[id] === 'x') {
         element.add('white').remove('black');
       }
-      if (layout[id] === 'black') {
+      if (layout[id] === 'y') {
         element.add('black').remove('white');
       }
     });
@@ -659,10 +439,9 @@ const Renderer = (function renderer() {
 
   function renderPicked() {
     const $ = window.jQuery;
-    const { layout } = Board.get();
-    const picked = Stage.get();
+    const { picked, board } = Stage.get();
 
-    Object.keys(layout).forEach((id) => {
+    Object.keys(board.layout).forEach((id) => {
       $(`#${id}`).remove('picked');
     });
 
@@ -707,13 +486,16 @@ const Game = (function game() {
 
   function offReset(element) {
     element.remove('picked');
-    Board.reset();
     Stage.reset();
     Renderer.invalidate();
   }
 
   function play() {
     const $ = window.jQuery;
+    $('#a4').touch(onPick, onPlay);
+    $('#b4').touch(onPick, onPlay);
+    $('#c4').touch(onPick, onPlay);
+
     $('#a3').touch(onPick, onPlay);
     $('#b3').touch(onPick, onPlay);
     $('#c3').touch(onPick, onPlay);
@@ -726,13 +508,8 @@ const Game = (function game() {
     $('#b1').touch(onPick, onPlay);
     $('#c1').touch(onPick, onPlay);
 
-    $('#p11').touch(onPick, onPlay);
-    $('#p12').touch(onPick, onPlay);
-    $('#p13').touch(onPick, onPlay);
-
     $('#reset').touch(onReset, offReset);
 
-    Board.reset();
     Stage.reset();
     Renderer.invalidate();
     Renderer.render();
