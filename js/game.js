@@ -98,7 +98,7 @@ Board.create = () => {
 //
 // Now that we can draw the board, we need a way to move pieces around it. If X
 // starts by moving from a1 to c4, we can write that as "a1-c4". If Y responds
-// by moving b5 to b4, we can write that as "b5-a4". We can keep both those
+// by moving b5 to a4, we can write that as "b5-a4". We can keep both those
 // moves in a list, `["a1-c4", "b5-a4"]`, and give ourselves a way to make them.
 
 Board.move = (board, moves) => {
@@ -312,7 +312,7 @@ AI.blocking = (board, player) => {
 };
 
 // Our AI wants to get all its pieces on the board. So it can use the rules to
-// find moves that orignate from a starting space.
+// find moves that originate from a starting space.
 
 AI.starting = (board, player) => {
   const moves = Rules.moves(board, player);
