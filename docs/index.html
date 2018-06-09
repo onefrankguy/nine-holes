@@ -361,9 +361,22 @@ AI.blocking = <span class="hljs-function">(<span class="hljs-params">board, play
         
       
         
+        <p>Our AI wants to get all its pieces on the board. So it can use the rules to
+find moves that orignate from a starting space.</p>
+
+        
+          <div class='highlight'><pre>
+AI.starting = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> moves = Rules.moves(board, player);
+  <span class="hljs-keyword">const</span> starting = Rules.starting(board);
+  <span class="hljs-keyword">return</span> moves.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> starting.indexOf(move.split(<span class="hljs-string">'-'</span>)[<span class="hljs-number">0</span>]) &gt; <span class="hljs-number">0</span>);
+};</pre></div>
+        
+      
+        
         <p>Our AI is simple. It plays a winning move if it sees one. Otherwise it plays
 a blocking move. If it doesn’t see any winning or blocking moves, it plays a
-legal move.</p>
+legal move. It prefers to play starting moves first.</p>
 
         
           <div class='highlight'><pre>
@@ -376,6 +389,11 @@ AI.moves = <span class="hljs-function">(<span class="hljs-params">board, player<
   <span class="hljs-keyword">const</span> blocking = AI.blocking(board, player);
   <span class="hljs-keyword">if</span> (blocking.length &gt; <span class="hljs-number">0</span>) {
     <span class="hljs-keyword">return</span> blocking;
+  }
+
+  <span class="hljs-keyword">const</span> starting = AI.starting(board, player);
+  <span class="hljs-keyword">if</span> (starting.length &gt; <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> starting;
   }
 
   <span class="hljs-keyword">return</span> Rules.moves(board, player);

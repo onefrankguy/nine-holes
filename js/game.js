@@ -311,9 +311,18 @@ AI.blocking = (board, player) => {
   return blocking.filter(move => winning.indexOf(move.slice(3)) > -1);
 };
 
+// Our AI wants to get all its pieces on the board. So it can use the rules to
+// find moves that orignate from a starting space.
+
+AI.starting = (board, player) => {
+  const moves = Rules.moves(board, player);
+  const starting = Rules.starting(board);
+  return moves.filter(move => starting.indexOf(move.split('-')[0]) > 0);
+};
+
 // Our AI is simple. It plays a winning move if it sees one. Otherwise it plays
 // a blocking move. If it doesn't see any winning or blocking moves, it plays a
-// legal move.
+// legal move. It prefers to play starting moves first.
 
 AI.moves = (board, player) => {
   const winning = AI.winning(board, player);
@@ -324,6 +333,11 @@ AI.moves = (board, player) => {
   const blocking = AI.blocking(board, player);
   if (blocking.length > 0) {
     return blocking;
+  }
+
+  const starting = AI.starting(board, player);
+  if (starting.length > 0) {
+    return starting;
   }
 
   return Rules.moves(board, player);
