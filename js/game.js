@@ -34,7 +34,6 @@ let Board = {};
 // }
 // </style>
 
-
 // When talking about board games, it's useful to be able to describe both the
 // players and the moves they make in shorthand. Chess notation used numbers for
 // ranks (rows) and letters for files (columns). So we can draw a 3 x 3 board
@@ -96,7 +95,7 @@ Board.create = () => {
 // the game. The board shouldn't know or care how it's rendered. For all it
 // knows, we could be playing this game on a terminal and drawing it out in
 // ASCII text.
-
+//
 // Now that we can draw the board, we need a way to move pieces around it. If X
 // starts by moving from a1 to c4, we can write that as "a1-c4". If Y responds
 // by moving b5 to b4, we can write that as "b5-a4". We can keep both those
@@ -124,10 +123,20 @@ Board.move = (board, moves) => {
 // two moves on it, and see how the board changes.
 //
 // ```
-// const starting = Board.create();
-// console.log(starting.layout);
-// const playing = Board.move(starting, ['a1-c4', 'b5-a4']);
-// console.log(playing.layout);
+// (function testImmutableBoard() {
+//   const starting = Board.create();
+//   const playing = Board.move(starting, ['a1-c4', 'b5-a4']);
+//
+//   assert(starting['a1'] === 'x');
+//   assert(starting['c4'] === '');
+//   assert(starting['b5'] === 'y');
+//   assert(starting['a4'] === '');
+//
+//   assert(playing['a1'] === '');
+//   assert(playing['c4'] === 'x');
+//   assert(playing['b5'] === '');
+//   assert(playing['a4'] === 'y');
+// }());
 // ```
 //
 // Here's the board after those two moves:
@@ -146,6 +155,135 @@ Board.move = (board, moves) => {
 // the rules of the game. Just like how we don't want the board to know or care
 // how it's displayed, we also don't want it to know or care about rules. We'll
 // figure those out next.
+
+let Rules = {};
+
+// You can move your own pieces.
+
+Rules.pickable = (board, player) => {
+  const spaces = Object.keys(board.layout);
+  return spaces.filter(space => board.layout[space] === player);
+};
+
+// You can move a piece to an empty non-starting space.
+
+Rules.starting = (board) => {
+  const spaces = Object.keys(board.layout);
+  return spaces.filter(space => space.charAt(1) === '1' || space.charAt(1) === '5');
+};
+
+Rules.playable = (board, player) => {
+  const spaces = Object.keys(board.layout);
+  const empty = spaces.filter(space => board.layout[space] === '');
+
+  const starting = Rules.starting(board);
+  return empty.filter(space => starting.indexOf(space) < 0);
+};
+
+// So every combination of a piece you can pick up and a space you can play
+// into, is an allowed move.
+
+Rules.moves = (board, player) => {
+  const pickable = Rules.pickable(board, player);
+  const playable = Rules.playable(board, player);
+  const moves = [];
+
+  pickable.forEach((start) => {
+    playable.forEach((end) => {
+      moves.push(`${start}-${end}`);
+    });
+  });
+
+  return moves;
+};
+
+// That's enough to write a tiny test. Continuing the game above, X has three
+// pieces, and there are seven empty spaces to play into. So that's twenty-one
+// allowed moves.
+//
+// ```
+// (function testMovementRules() {
+//   const starting = Board.create();
+//   const playing = Board.move(starting, ['a1-c4', 'b5-a4']);
+//   const moves = Rules.moves(playing, 'x');
+//
+//   assert(moves.length === 21);
+// }());
+// ```
+//
+// The game is over when either player wins by getting three of their pieces in
+// a row. Diagonals don't count though, and we don't want to include pieces in
+// starting spaces.
+
+Rules.winner = (board) => {
+  const files = board.files.slice();
+  const ranks = board.ranks.slice(1, -1);
+
+  let winner;
+
+  ranks.forEach((rank) => {
+    if (!winner) {
+      const players = [];
+
+      files.forEach((file) => {
+        players.push(board.layout[file + rank]);
+      });
+
+      if (new Set(players).size === 1 && players[0] !== '') {
+        [winner] = players;
+      }
+    }
+  });
+
+  files.forEach((file) => {
+    if (!winner) {
+      const players = [];
+
+      ranks.forEach((rank) => {
+        players.push(board.layout[file + rank]);
+      });
+
+      if (new Set(players).size === 1 && players[0] !== '') {
+        [winner] = players;
+      }
+    }
+  });
+
+  return winner;
+};
+
+// The decision to test for file wins first (vertical) instead of rank wins
+// (horizontal) is totally arbitrary. The `slice()` function is used to get
+// copies of the ranks and files from the board without changing it.
+//
+// We'll write a test to cover all four cases:
+//
+// 1. Starting space don't count.
+// 2. Three in a row horizontally wins.
+// 3. Three in a row vertically wins.
+// 4. Three in a row diagonally doesn't count.
+//
+// ```
+// (function testWinnerRules() {
+//   const starting = Board.create();
+//   assert(Rules.winner(starting) === undefined);
+//
+//   const horizontal = Board.move(starting, ['a1-a2', 'b1-b2', 'c1-c2']);
+//   assert(Rules.winner(horizontal) === 'x');
+//
+//   const vertical = Board.move(starting, ['a5-a4', 'b5-a3', 'c5-a2']);
+//   assert(Rules.winner(vertical) === 'y');
+//
+//   const diagonal = Board.move(starting, ['a1-a2', 'b1-b3', 'c1-c4']);
+//   assert(Rules.winner(diagonal) === undefined);
+// }());
+// ```
+//
+// There are other edge cases we could cover, like three in a row vertically
+// where one of the pieces is in a starting space. But the goal here isn't
+// exhaustive test coverage. Often the best way to test a game is to start
+// playing it. To do that, we'll need an oppontent. But before we write an AI,
+// we'll detour slightly and talk about randomness.
 //
 // ---
 //
@@ -215,7 +353,7 @@ Board = (function board() {
   };
 }());
 
-const Rules = (function rules() {
+Rules = (function rules() {
   // You can only move your own pieces.
   function pickable(player, board) {
     return Object.keys(board.layout).filter((position) => {

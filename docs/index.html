@@ -122,11 +122,7 @@ Board.create = <span class="hljs-function"><span class="hljs-params">()</span> =
 the game. The board shouldn’t know or care how it’s rendered. For all it
 knows, we could be playing this game on a terminal and drawing it out in
 ASCII text.</p>
-
-        
-      
-        
-        <p>Now that we can draw the board, we need a way to move pieces around it. If X
+<p>Now that we can draw the board, we need a way to move pieces around it. If X
 starts by moving from a1 to c4, we can write that as “a1-c4”. If Y responds
 by moving b5 to b4, we can write that as “b5-a4”. We can keep both those
 moves in a list, <code>[&quot;a1-c4&quot;, &quot;b5-a4&quot;]</code>, and give ourselves a way to make them.</p>
@@ -154,10 +150,20 @@ are easier to debug than functions that mutate state, so we’ll try to write
 as many of them as we can.</p>
 <p>We now have enough code to run a tiny test. We’ll create a new board, make
 two moves on it, and see how the board changes.</p>
-<pre><code><span class="hljs-keyword">const</span> starting = Board.create();
-<span class="hljs-built_in">console</span>.log(starting.layout);
-<span class="hljs-keyword">const</span> playing = Board.move(starting, [<span class="hljs-string">'a1-c4'</span>, <span class="hljs-string">'b5-a4'</span>]);
-<span class="hljs-built_in">console</span>.log(playing.layout);
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testImmutableBoard</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> starting = Board.create();
+  <span class="hljs-keyword">const</span> playing = Board.move(starting, [<span class="hljs-string">'a1-c4'</span>, <span class="hljs-string">'b5-a4'</span>]);
+
+  assert(starting[<span class="hljs-string">'a1'</span>] === <span class="hljs-string">'x'</span>);
+  assert(starting[<span class="hljs-string">'c4'</span>] === <span class="hljs-string">''</span>);
+  assert(starting[<span class="hljs-string">'b5'</span>] === <span class="hljs-string">'y'</span>);
+  assert(starting[<span class="hljs-string">'a4'</span>] === <span class="hljs-string">''</span>);
+
+  assert(playing[<span class="hljs-string">'a1'</span>] === <span class="hljs-string">''</span>);
+  assert(playing[<span class="hljs-string">'c4'</span>] === <span class="hljs-string">'x'</span>);
+  assert(playing[<span class="hljs-string">'b5'</span>] === <span class="hljs-string">''</span>);
+  assert(playing[<span class="hljs-string">'a4'</span>] === <span class="hljs-string">'y'</span>);
+}());
 </code></pre><p>Here’s the board after those two moves:</p>
 <table>
 <tr><td class="label">5</td><td>y</td><td></td><td>y</td></tr>
@@ -173,6 +179,147 @@ each other. That would be illegal, but the <code>Board.move</code> function does
 the rules of the game. Just like how we don’t want the board to know or care
 how it’s displayed, we also don’t want it to know or care about rules. We’ll
 figure those out next.</p>
+
+        
+          <div class='highlight'><pre>
+<span class="hljs-keyword">let</span> Rules = {};</pre></div>
+        
+      
+        
+        <p>You can move your own pieces.</p>
+
+        
+          <div class='highlight'><pre>
+Rules.pickable = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> spaces = <span class="hljs-built_in">Object</span>.keys(board.layout);
+  <span class="hljs-keyword">return</span> spaces.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> board.layout[space] === player);
+};</pre></div>
+        
+      
+        
+        <p>You can move a piece to an empty non-starting space.</p>
+
+        
+          <div class='highlight'><pre>
+Rules.starting = <span class="hljs-function">(<span class="hljs-params">board</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> spaces = <span class="hljs-built_in">Object</span>.keys(board.layout);
+  <span class="hljs-keyword">return</span> spaces.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> space.charAt(<span class="hljs-number">1</span>) === <span class="hljs-string">'1'</span> || space.charAt(<span class="hljs-number">1</span>) === <span class="hljs-string">'5'</span>);
+};
+
+Rules.playable = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> spaces = <span class="hljs-built_in">Object</span>.keys(board.layout);
+  <span class="hljs-keyword">const</span> empty = spaces.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> board.layout[space] === <span class="hljs-string">''</span>);
+
+  <span class="hljs-keyword">const</span> starting = Rules.starting(board);
+  <span class="hljs-keyword">return</span> empty.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> starting.indexOf(space) &lt; <span class="hljs-number">0</span>);
+};</pre></div>
+        
+      
+        
+        <p>So every combination of a piece you can pick up and a space you can play
+into, is an allowed move.</p>
+
+        
+          <div class='highlight'><pre>
+Rules.moves = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> pickable = Rules.pickable(board, player);
+  <span class="hljs-keyword">const</span> playable = Rules.playable(board, player);
+  <span class="hljs-keyword">const</span> moves = [];
+
+  pickable.forEach(<span class="hljs-function">(<span class="hljs-params">start</span>) =&gt;</span> {
+    playable.forEach(<span class="hljs-function">(<span class="hljs-params">end</span>) =&gt;</span> {
+      moves.push(<span class="hljs-string">`<span class="hljs-subst">${start}</span>-<span class="hljs-subst">${end}</span>`</span>);
+    });
+  });
+
+  <span class="hljs-keyword">return</span> moves;
+};</pre></div>
+        
+      
+        
+        <p>That’s enough to write a tiny test. Continuing the game above, X has three
+pieces, and there are seven empty spaces to play into. So that’s twenty-one
+allowed moves.</p>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testMovementRules</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> starting = Board.create();
+  <span class="hljs-keyword">const</span> playing = Board.move(starting, [<span class="hljs-string">'a1-c4'</span>, <span class="hljs-string">'b5-a4'</span>]);
+  <span class="hljs-keyword">const</span> moves = Rules.moves(playing, <span class="hljs-string">'x'</span>);
+
+  assert(moves.length === <span class="hljs-number">21</span>);
+}());
+</code></pre><p>The game is over when either player wins by getting three of their pieces in
+a row. Diagonals don’t count though, and we don’t want to include pieces in
+starting spaces.</p>
+
+        
+          <div class='highlight'><pre>
+Rules.winner = <span class="hljs-function">(<span class="hljs-params">board</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> files = board.files.slice();
+  <span class="hljs-keyword">const</span> ranks = board.ranks.slice(<span class="hljs-number">1</span>, <span class="hljs-number">-1</span>);
+
+  <span class="hljs-keyword">let</span> winner;
+
+  ranks.forEach(<span class="hljs-function">(<span class="hljs-params">rank</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!winner) {
+      <span class="hljs-keyword">const</span> players = [];
+
+      files.forEach(<span class="hljs-function">(<span class="hljs-params">file</span>) =&gt;</span> {
+        players.push(board.layout[file + rank]);
+      });
+
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
+        [winner] = players;
+      }
+    }
+  });
+
+  files.forEach(<span class="hljs-function">(<span class="hljs-params">file</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!winner) {
+      <span class="hljs-keyword">const</span> players = [];
+
+      ranks.forEach(<span class="hljs-function">(<span class="hljs-params">rank</span>) =&gt;</span> {
+        players.push(board.layout[file + rank]);
+      });
+
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
+        [winner] = players;
+      }
+    }
+  });
+
+  <span class="hljs-keyword">return</span> winner;
+};</pre></div>
+        
+      
+        
+        <p>The decision to test for file wins first (vertical) instead of rank wins
+(horizontal) is totally arbitrary. The <code>slice()</code> function is used to get
+copies of the ranks and files from the board without changing it.</p>
+<p>We’ll write a test to cover all four cases:</p>
+<ol>
+<li>Starting space don’t count.</li>
+<li>Three in a row horizontally wins.</li>
+<li>Three in a row vertically wins.</li>
+<li>Three in a row diagonally doesn’t count.</li>
+</ol>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testWinnerRules</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> starting = Board.create();
+  assert(Rules.winner(starting) === <span class="hljs-literal">undefined</span>);
+
+  <span class="hljs-keyword">const</span> horizontal = Board.move(starting, [<span class="hljs-string">'a1-a2'</span>, <span class="hljs-string">'b1-b2'</span>, <span class="hljs-string">'c1-c2'</span>]);
+  assert(Rules.winner(horizontal) === <span class="hljs-string">'x'</span>);
+
+  <span class="hljs-keyword">const</span> vertical = Board.move(starting, [<span class="hljs-string">'a5-a4'</span>, <span class="hljs-string">'b5-a3'</span>, <span class="hljs-string">'c5-a2'</span>]);
+  assert(Rules.winner(vertical) === <span class="hljs-string">'y'</span>);
+
+  <span class="hljs-keyword">const</span> diagonal = Board.move(starting, [<span class="hljs-string">'a1-a2'</span>, <span class="hljs-string">'b1-b3'</span>, <span class="hljs-string">'c1-c4'</span>]);
+  assert(Rules.winner(diagonal) === <span class="hljs-literal">undefined</span>);
+}());
+</code></pre><p>There are other edge cases we could cover, like three in a row vertically
+where one of the pieces is in a starting space. But the goal here isn’t
+exhaustive test coverage. Often the best way to test a game is to start
+playing it. To do that, we’ll need an oppontent. But before we write an AI,
+we’ll detour slightly and talk about randomness.</p>
 <hr>
 
         
@@ -250,7 +397,7 @@ Board = (<span class="hljs-function"><span class="hljs-keyword">function</span> 
   };
 }());
 
-<span class="hljs-keyword">const</span> Rules = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rules</span>(<span class="hljs-params"></span>) </span>{</pre></div>
+Rules = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rules</span>(<span class="hljs-params"></span>) </span>{</pre></div>
         
       
         
