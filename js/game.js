@@ -502,26 +502,12 @@ const Game = (function game() {
 
   function play() {
     const $ = window.jQuery;
-    $('#a4').touch(onPick, onPlay);
-    $('#b4').touch(onPick, onPlay);
-    $('#c4').touch(onPick, onPlay);
-
-    $('#a3').touch(onPick, onPlay);
-    $('#b3').touch(onPick, onPlay);
-    $('#c3').touch(onPick, onPlay);
-
-    $('#a2').touch(onPick, onPlay);
-    $('#b2').touch(onPick, onPlay);
-    $('#c2').touch(onPick, onPlay);
-
-    $('#a1').touch(onPick, onPlay);
-    $('#b1').touch(onPick, onPlay);
-    $('#c1').touch(onPick, onPlay);
 
     $('#reset').touch(onReset, offReset);
 
-    Stage.reset();
-    Renderer.invalidate();
+    const { layout } = Stage.get().board;
+    Object.keys(layout).forEach(id => $(`#${id}`).touch(onPick, onPlay));
+
     Renderer.render();
   }
 

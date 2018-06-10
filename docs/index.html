@@ -559,26 +559,12 @@ it can play our game against itself.</p>
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
-    $(<span class="hljs-string">'#a4'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#b4'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#c4'</span>).touch(onPick, onPlay);
-
-    $(<span class="hljs-string">'#a3'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#b3'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#c3'</span>).touch(onPick, onPlay);
-
-    $(<span class="hljs-string">'#a2'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#b2'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#c2'</span>).touch(onPick, onPlay);
-
-    $(<span class="hljs-string">'#a1'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#b1'</span>).touch(onPick, onPlay);
-    $(<span class="hljs-string">'#c1'</span>).touch(onPick, onPlay);
 
     $(<span class="hljs-string">'#reset'</span>).touch(onReset, offReset);
 
-    Stage.reset();
-    Renderer.invalidate();
+    <span class="hljs-keyword">const</span> { layout } = Stage.get().board;
+    <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).touch(onPick, onPlay));
+
     Renderer.render();
   }
 
