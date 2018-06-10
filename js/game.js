@@ -449,24 +449,19 @@ const Stage = (function stage() {
 
 const Renderer = {};
 
-Renderer.render = () => {
+Renderer.render = (board, picked) => {
   const $ = window.jQuery;
-  const { picked, board } = Stage.get();
 
-  const empty = Object.keys(board.layout).filter(id => !board.layout[id]);
-  empty.forEach(id => $(`#${id}`).remove('x').remove('y').remove('picked'));
-
-  const xs = Object.keys(board.layout).filter(id => board.layout[id] === 'x');
-  xs.forEach(id => $(`#${id}`).add('x').remove('y').remove('picked'));
-
-  const ys = Object.keys(board.layout).filter(id => board.layout[id] === 'y');
-  ys.forEach(id => $(`#${id}`).add('y').remove('x').remove('picked'));
+  Object.keys(board.layout).forEach((id) => {
+    const element = $(`#${id}`);
+    element.remove('picked').remove('x').remove('y').add(board.layout[id]);
+  });
 
   $(`#${picked}`).add('picked');
 };
 
-Renderer.invalidate = () => {
-  requestAnimationFrame(Renderer.render);
+Renderer.invalidate = (board, picked) => {
+  requestAnimationFrame(() => Renderer.render(board, picked));
 };
 
 const Game = (function game() {
@@ -476,7 +471,8 @@ const Game = (function game() {
 
   function onPlay(element) {
     Stage.next(element.unwrap().id);
-    Renderer.invalidate();
+    const { board, picked } = Stage.get();
+    Renderer.invalidate(board, picked);
   }
 
   function onReset(element) {
@@ -486,7 +482,8 @@ const Game = (function game() {
   function offReset(element) {
     element.remove('picked');
     Stage.reset();
-    Renderer.invalidate();
+    const { board, picked } = Stage.get();
+    Renderer.invalidate(board, picked);
   }
 
   function play() {
@@ -497,7 +494,8 @@ const Game = (function game() {
     const { layout } = Stage.get().board;
     Object.keys(layout).forEach(id => $(`#${id}`).touch(onPick, onPlay));
 
-    Renderer.invalidate();
+    const { board, picked } = Stage.get();
+    Renderer.invalidate(board, picked);
   }
 
   return {
@@ -523,7 +521,7 @@ const Game = (function game() {
   }
 
   Fn.prototype.add = function add(klass) {
-    if (this.element && this.element.classList) {
+    if (this.element && this.element.classList && klass) {
       this.element.classList.add(klass);
     }
 

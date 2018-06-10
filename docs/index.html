@@ -506,24 +506,19 @@ Engine.next = <span class="hljs-function">(<span class="hljs-params">board, move
 
 <span class="hljs-keyword">const</span> Renderer = {};
 
-Renderer.render = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+Renderer.render = <span class="hljs-function">(<span class="hljs-params">board, picked</span>) =&gt;</span> {
   <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
-  <span class="hljs-keyword">const</span> { picked, board } = Stage.get();
 
-  <span class="hljs-keyword">const</span> empty = <span class="hljs-built_in">Object</span>.keys(board.layout).filter(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> !board.layout[id]);
-  empty.forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).remove(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'y'</span>).remove(<span class="hljs-string">'picked'</span>));
-
-  <span class="hljs-keyword">const</span> xs = <span class="hljs-built_in">Object</span>.keys(board.layout).filter(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> board.layout[id] === <span class="hljs-string">'x'</span>);
-  xs.forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).add(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'y'</span>).remove(<span class="hljs-string">'picked'</span>));
-
-  <span class="hljs-keyword">const</span> ys = <span class="hljs-built_in">Object</span>.keys(board.layout).filter(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> board.layout[id] === <span class="hljs-string">'y'</span>);
-  ys.forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).add(<span class="hljs-string">'y'</span>).remove(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'picked'</span>));
+  <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>);
+    element.remove(<span class="hljs-string">'picked'</span>).remove(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'y'</span>).add(board.layout[id]);
+  });
 
   $(<span class="hljs-string">`#<span class="hljs-subst">${picked}</span>`</span>).add(<span class="hljs-string">'picked'</span>);
 };
 
-Renderer.invalidate = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
-  requestAnimationFrame(Renderer.render);
+Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">board, picked</span>) =&gt;</span> {
+  requestAnimationFrame(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> Renderer.render(board, picked));
 };
 
 <span class="hljs-keyword">const</span> Game = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
@@ -533,7 +528,8 @@ Renderer.invalidate = <span class="hljs-function"><span class="hljs-params">()</
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPlay</span>(<span class="hljs-params">element</span>) </span>{
     Stage.next(element.unwrap().id);
-    Renderer.invalidate();
+    <span class="hljs-keyword">const</span> { board, picked } = Stage.get();
+    Renderer.invalidate(board, picked);
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onReset</span>(<span class="hljs-params">element</span>) </span>{
@@ -543,7 +539,8 @@ Renderer.invalidate = <span class="hljs-function"><span class="hljs-params">()</
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offReset</span>(<span class="hljs-params">element</span>) </span>{
     element.remove(<span class="hljs-string">'picked'</span>);
     Stage.reset();
-    Renderer.invalidate();
+    <span class="hljs-keyword">const</span> { board, picked } = Stage.get();
+    Renderer.invalidate(board, picked);
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
@@ -554,7 +551,8 @@ Renderer.invalidate = <span class="hljs-function"><span class="hljs-params">()</
     <span class="hljs-keyword">const</span> { layout } = Stage.get().board;
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).touch(onPick, onPlay));
 
-    Renderer.invalidate();
+    <span class="hljs-keyword">const</span> { board, picked } = Stage.get();
+    Renderer.invalidate(board, picked);
   }
 
   <span class="hljs-keyword">return</span> {
@@ -580,7 +578,7 @@ Renderer.invalidate = <span class="hljs-function"><span class="hljs-params">()</
   }
 
   Fn.prototype.add = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">klass</span>) </span>{
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.element &amp;&amp; <span class="hljs-keyword">this</span>.element.classList) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.element &amp;&amp; <span class="hljs-keyword">this</span>.element.classList &amp;&amp; klass) {
       <span class="hljs-keyword">this</span>.element.classList.add(klass);
     }
 
