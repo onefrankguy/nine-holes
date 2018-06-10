@@ -101,8 +101,10 @@ Board.create = () => {
 // by moving b5 to a4, we can write that as "b5-a4". We can keep both those
 // moves in a list, `["a1-c4", "b5-a4"]`, and give ourselves a way to make them.
 
+Board.clone = board => JSON.parse(JSON.stringify(board));
+
 Board.move = (board, moves) => {
-  const copy = JSON.parse(JSON.stringify(board));
+  const copy = Board.clone(board);
 
   moves.forEach((move) => {
     const [start, end] = move.split('-');
@@ -111,6 +113,11 @@ Board.move = (board, moves) => {
   });
 
   return copy;
+};
+
+Board.player = (board, move) => {
+  const [start] = move.split('-');
+  return board.layout[start];
 };
 
 // The `Board.move` function uses `JSON.stringify` and `JSON.parse` to make a
@@ -304,8 +311,10 @@ AI.winning = (board, player) => {
 // AI can find a move it can make that puts its piece in the same space, that's
 // a blocking move.
 
+AI.opponent = player => player === 'x' ? 'y' : 'x';
+
 AI.blocking = (board, player) => {
-  const opponent = player === 'x' ? 'y' : 'x';
+  const opponent = AI.opponent(player);
   const winning = AI.winning(board, opponent).map(move => move.slice(3));
   const blocking = Rules.moves(board, player);
   return blocking.filter(move => winning.indexOf(move.slice(3)) > -1);
@@ -343,6 +352,12 @@ AI.moves = (board, player) => {
   return Rules.moves(board, player);
 };
 
+AI.move = (board, player) => {
+  const moves = AI.moves(board, player);
+  const index = Math.floor(Math.random() * moves.length);
+  return moves[index];
+}
+
 // Because our AI is stateless, and all its functions take a `player` argument,
 // it can play our game against itself.
 //
@@ -351,23 +366,43 @@ AI.moves = (board, player) => {
 //   let board = Board.create();
 //   let winner;
 //
-//   function play(board, player) {
-//     console.log(`${player} is playing on ${JSON.stringify(board.layout)}`);
-//     const moves = AI.moves(board, player);
-//     const index = Math.floor(Math.random() * moves.length);
-//     console.log(`${player} plays`, moves[index]);
-//     return Board.move(board, [moves[index]]);
-//   }
-//
 //   while (!winner) {
-//     board = play(board, 'x');
-//     board = play(board, 'y');
+//     const xmove = AI.move(board, 'x');
+//     board = Board.move(board, [xmove]);
+//     console.log(`x plays ${xmove} resulting in`, JSON.stringify(board.layout));
+//
+//     const ymove = AI.move(board, 'y');
+//     board = Board.move(board, [ymove]);
+//     console.log(`y plays ${ymove} resulting in`, JSON.stringify(board.layout));
+//
 //     winner = Rules.winner(board);
 //   }
 //
 //   console.log(`${winner} wins!`);
 // }());
 // ```
+
+const Engine = {};
+
+Engine.next = (board, move) => {
+  const player = Board.player(board, move);
+  const opponent = AI.opponent(player);
+
+  if (Rules.winner(board)) {
+    return Board.clone(board);
+  }
+
+  if (Rules.moves(board, player).indexOf(move) < 0) {
+    return Board.clone(board);
+  }
+
+  const next = Board.move(board, [move]);
+  if (Rules.winner(next) === player) {
+    return next;
+  }
+
+  return Board.move(next, [AI.move(next, opponent)]);
+};
 
 const Stage = (function stage() {
   let board = Board.create();
@@ -383,10 +418,6 @@ const Stage = (function stage() {
   }
 
   function next(message) {
-    if (Rules.winner(board)) {
-      return;
-    }
-
     const pickable = Rules.pickable(board, 'x').indexOf(message) > -1;
 
     if (!picked) {
@@ -405,18 +436,8 @@ const Stage = (function stage() {
       return;
     }
 
-    board = Board.move(board, [`${picked}-${message}`]);
+    board = Engine.next(board, `${picked}-${message}`);
     picked = undefined;
-
-    if (Rules.winner(board) === 'x') {
-      return;
-    }
-
-    const moves = AI.moves(board, 'y');
-    if (moves.length > 0) {
-      const index = Math.floor(Math.random() * moves.length);
-      board = Board.move(board, [moves[index]]);
-    }
   }
 
   return {

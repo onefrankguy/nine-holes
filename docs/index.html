@@ -129,8 +129,10 @@ moves in a list, <code>[&quot;a1-c4&quot;, &quot;b5-a4&quot;]</code>, and give o
 
         
           <div class='highlight'><pre>
+Board.clone = <span class="hljs-function"><span class="hljs-params">board</span> =&gt;</span> <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify(board));
+
 Board.move = <span class="hljs-function">(<span class="hljs-params">board, moves</span>) =&gt;</span> {
-  <span class="hljs-keyword">const</span> copy = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify(board));
+  <span class="hljs-keyword">const</span> copy = Board.clone(board);
 
   moves.forEach(<span class="hljs-function">(<span class="hljs-params">move</span>) =&gt;</span> {
     <span class="hljs-keyword">const</span> [start, end] = move.split(<span class="hljs-string">'-'</span>);
@@ -139,6 +141,11 @@ Board.move = <span class="hljs-function">(<span class="hljs-params">board, moves
   });
 
   <span class="hljs-keyword">return</span> copy;
+};
+
+Board.player = <span class="hljs-function">(<span class="hljs-params">board, move</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> [start] = move.split(<span class="hljs-string">'-'</span>);
+  <span class="hljs-keyword">return</span> board.layout[start];
 };</pre></div>
         
       
@@ -352,8 +359,10 @@ a blocking move.</p>
 
         
           <div class='highlight'><pre>
+AI.opponent = <span class="hljs-function"><span class="hljs-params">player</span> =&gt;</span> player === <span class="hljs-string">'x'</span> ? <span class="hljs-string">'y'</span> : <span class="hljs-string">'x'</span>;
+
 AI.blocking = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
-  <span class="hljs-keyword">const</span> opponent = player === <span class="hljs-string">'x'</span> ? <span class="hljs-string">'y'</span> : <span class="hljs-string">'x'</span>;
+  <span class="hljs-keyword">const</span> opponent = AI.opponent(player);
   <span class="hljs-keyword">const</span> winning = AI.winning(board, opponent).map(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> move.slice(<span class="hljs-number">3</span>));
   <span class="hljs-keyword">const</span> blocking = Rules.moves(board, player);
   <span class="hljs-keyword">return</span> blocking.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> winning.indexOf(move.slice(<span class="hljs-number">3</span>)) &gt; <span class="hljs-number">-1</span>);
@@ -397,7 +406,13 @@ AI.moves = <span class="hljs-function">(<span class="hljs-params">board, player<
   }
 
   <span class="hljs-keyword">return</span> Rules.moves(board, player);
-};</pre></div>
+};
+
+AI.move = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> moves = AI.moves(board, player);
+  <span class="hljs-keyword">const</span> index = <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * moves.length);
+  <span class="hljs-keyword">return</span> moves[index];
+}</pre></div>
         
       
         
@@ -407,17 +422,15 @@ it can play our game against itself.</p>
   <span class="hljs-keyword">let</span> board = Board.create();
   <span class="hljs-keyword">let</span> winner;
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params">board, player</span>) </span>{
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${player}</span> is playing on <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(board.layout)}</span>`</span>);
-    <span class="hljs-keyword">const</span> moves = AI.moves(board, player);
-    <span class="hljs-keyword">const</span> index = <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * moves.length);
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${player}</span> plays`</span>, moves[index]);
-    <span class="hljs-keyword">return</span> Board.move(board, [moves[index]]);
-  }
-
   <span class="hljs-keyword">while</span> (!winner) {
-    board = play(board, <span class="hljs-string">'x'</span>);
-    board = play(board, <span class="hljs-string">'y'</span>);
+    <span class="hljs-keyword">const</span> xmove = AI.move(board, <span class="hljs-string">'x'</span>);
+    board = Board.move(board, [xmove]);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`x plays <span class="hljs-subst">${xmove}</span> resulting in`</span>, <span class="hljs-built_in">JSON</span>.stringify(board.layout));
+
+    <span class="hljs-keyword">const</span> ymove = AI.move(board, <span class="hljs-string">'y'</span>);
+    board = Board.move(board, [ymove]);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`y plays <span class="hljs-subst">${ymove}</span> resulting in`</span>, <span class="hljs-built_in">JSON</span>.stringify(board.layout));
+
     winner = Rules.winner(board);
   }
 
@@ -426,6 +439,28 @@ it can play our game against itself.</p>
 </code></pre>
         
           <div class='highlight'><pre>
+<span class="hljs-keyword">const</span> Engine = {};
+
+Engine.next = <span class="hljs-function">(<span class="hljs-params">board, move</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> player = Board.player(board, move);
+  <span class="hljs-keyword">const</span> opponent = AI.opponent(player);
+
+  <span class="hljs-keyword">if</span> (Rules.winner(board)) {
+    <span class="hljs-keyword">return</span> Board.clone(board);
+  }
+
+  <span class="hljs-keyword">if</span> (Rules.moves(board, player).indexOf(move) &lt; <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> Board.clone(board);
+  }
+
+  <span class="hljs-keyword">const</span> next = Board.move(board, [move]);
+  <span class="hljs-keyword">if</span> (Rules.winner(next) === player) {
+    <span class="hljs-keyword">return</span> next;
+  }
+
+  <span class="hljs-keyword">return</span> Board.move(next, [AI.move(next, opponent)]);
+};
+
 <span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> board = Board.create();
   <span class="hljs-keyword">let</span> picked;
@@ -440,10 +475,6 @@ it can play our game against itself.</p>
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">message</span>) </span>{
-    <span class="hljs-keyword">if</span> (Rules.winner(board)) {
-      <span class="hljs-keyword">return</span>;
-    }
-
     <span class="hljs-keyword">const</span> pickable = Rules.pickable(board, <span class="hljs-string">'x'</span>).indexOf(message) &gt; <span class="hljs-number">-1</span>;
 
     <span class="hljs-keyword">if</span> (!picked) {
@@ -462,18 +493,8 @@ it can play our game against itself.</p>
       <span class="hljs-keyword">return</span>;
     }
 
-    board = Board.move(board, [<span class="hljs-string">`<span class="hljs-subst">${picked}</span>-<span class="hljs-subst">${message}</span>`</span>]);
+    board = Engine.next(board, <span class="hljs-string">`<span class="hljs-subst">${picked}</span>-<span class="hljs-subst">${message}</span>`</span>);
     picked = <span class="hljs-literal">undefined</span>;
-
-    <span class="hljs-keyword">if</span> (Rules.winner(board) === <span class="hljs-string">'x'</span>) {
-      <span class="hljs-keyword">return</span>;
-    }
-
-    <span class="hljs-keyword">const</span> moves = AI.moves(board, <span class="hljs-string">'y'</span>);
-    <span class="hljs-keyword">if</span> (moves.length &gt; <span class="hljs-number">0</span>) {
-      <span class="hljs-keyword">const</span> index = <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * moves.length);
-      board = Board.move(board, [moves[index]]);
-    }
   }
 
   <span class="hljs-keyword">return</span> {
