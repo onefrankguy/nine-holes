@@ -215,7 +215,7 @@ Rules.starting = <span class="hljs-function">(<span class="hljs-params">board</s
 
 Rules.playable = <span class="hljs-function">(<span class="hljs-params">board</span>) =&gt;</span> {
   <span class="hljs-keyword">const</span> spaces = <span class="hljs-built_in">Object</span>.keys(board.layout);
-  <span class="hljs-keyword">const</span> empty = spaces.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> board.layout[space] === <span class="hljs-string">''</span>);
+  <span class="hljs-keyword">const</span> empty = spaces.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> !board.layout[space]);
 
   <span class="hljs-keyword">const</span> starting = Rules.starting(board);
   <span class="hljs-keyword">return</span> empty.filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> starting.indexOf(space) &lt; <span class="hljs-number">0</span>);
@@ -274,7 +274,7 @@ Rules.winner = <span class="hljs-function">(<span class="hljs-params">board</spa
         players.push(board.layout[file + rank]);
       });
 
-      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>]) {
         [winner] = players;
       }
     }
@@ -288,7 +288,7 @@ Rules.winner = <span class="hljs-function">(<span class="hljs-params">board</spa
         players.push(board.layout[file + rank]);
       });
 
-      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>] !== <span class="hljs-string">''</span>) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(players).size === <span class="hljs-number">1</span> &amp;&amp; players[<span class="hljs-number">0</span>]) {
         [winner] = players;
       }
     }
@@ -359,7 +359,7 @@ a blocking move.</p>
 
         
           <div class='highlight'><pre>
-AI.opponent = <span class="hljs-function"><span class="hljs-params">player</span> =&gt;</span> player === <span class="hljs-string">'x'</span> ? <span class="hljs-string">'y'</span> : <span class="hljs-string">'x'</span>;
+AI.opponent = <span class="hljs-function"><span class="hljs-params">player</span> =&gt;</span> (player === <span class="hljs-string">'x'</span> ? <span class="hljs-string">'y'</span> : <span class="hljs-string">'x'</span>);
 
 AI.blocking = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
   <span class="hljs-keyword">const</span> opponent = AI.opponent(player);
@@ -412,7 +412,7 @@ AI.move = <span class="hljs-function">(<span class="hljs-params">board, player</
   <span class="hljs-keyword">const</span> moves = AI.moves(board, player);
   <span class="hljs-keyword">const</span> index = <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * moves.length);
   <span class="hljs-keyword">return</span> moves[index];
-}</pre></div>
+};</pre></div>
         
       
         
@@ -510,7 +510,7 @@ Renderer.render = <span class="hljs-function"><span class="hljs-params">()</span
   <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
   <span class="hljs-keyword">const</span> { picked, board } = Stage.get();
 
-  <span class="hljs-keyword">const</span> empty = <span class="hljs-built_in">Object</span>.keys(board.layout).filter(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> board.layout[id] === <span class="hljs-string">''</span>);
+  <span class="hljs-keyword">const</span> empty = <span class="hljs-built_in">Object</span>.keys(board.layout).filter(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> !board.layout[id]);
   empty.forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).remove(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'y'</span>).remove(<span class="hljs-string">'picked'</span>));
 
   <span class="hljs-keyword">const</span> xs = <span class="hljs-built_in">Object</span>.keys(board.layout).filter(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> board.layout[id] === <span class="hljs-string">'x'</span>);

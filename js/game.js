@@ -181,7 +181,7 @@ Rules.starting = (board) => {
 
 Rules.playable = (board) => {
   const spaces = Object.keys(board.layout);
-  const empty = spaces.filter(space => board.layout[space] === '');
+  const empty = spaces.filter(space => !board.layout[space]);
 
   const starting = Rules.starting(board);
   return empty.filter(space => starting.indexOf(space) < 0);
@@ -236,7 +236,7 @@ Rules.winner = (board) => {
         players.push(board.layout[file + rank]);
       });
 
-      if (new Set(players).size === 1 && players[0] !== '') {
+      if (new Set(players).size === 1 && players[0]) {
         [winner] = players;
       }
     }
@@ -250,7 +250,7 @@ Rules.winner = (board) => {
         players.push(board.layout[file + rank]);
       });
 
-      if (new Set(players).size === 1 && players[0] !== '') {
+      if (new Set(players).size === 1 && players[0]) {
         [winner] = players;
       }
     }
@@ -311,7 +311,7 @@ AI.winning = (board, player) => {
 // AI can find a move it can make that puts its piece in the same space, that's
 // a blocking move.
 
-AI.opponent = player => player === 'x' ? 'y' : 'x';
+AI.opponent = player => (player === 'x' ? 'y' : 'x');
 
 AI.blocking = (board, player) => {
   const opponent = AI.opponent(player);
@@ -356,7 +356,7 @@ AI.move = (board, player) => {
   const moves = AI.moves(board, player);
   const index = Math.floor(Math.random() * moves.length);
   return moves[index];
-}
+};
 
 // Because our AI is stateless, and all its functions take a `player` argument,
 // it can play our game against itself.
@@ -453,7 +453,7 @@ Renderer.render = () => {
   const $ = window.jQuery;
   const { picked, board } = Stage.get();
 
-  const empty = Object.keys(board.layout).filter(id => board.layout[id] === '');
+  const empty = Object.keys(board.layout).filter(id => !board.layout[id]);
   empty.forEach(id => $(`#${id}`).remove('x').remove('y').remove('picked'));
 
   const xs = Object.keys(board.layout).filter(id => board.layout[id] === 'x');
