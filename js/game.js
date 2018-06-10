@@ -426,59 +426,27 @@ const Stage = (function stage() {
   };
 }());
 
-const Renderer = (function renderer() {
-  let dirty = true;
+const Renderer = {};
 
-  function renderBoard() {
-    const $ = window.jQuery;
-    const { layout } = Stage.get().board;
+Renderer.render = () => {
+  const $ = window.jQuery;
+  const { picked, board } = Stage.get();
 
-    Object.keys(layout).forEach((id) => {
-      const element = $(`#${id}`);
-      if (layout[id] === '') {
-        element.remove('x').remove('y');
-      }
-      if (layout[id] === 'x') {
-        element.add('x').remove('y');
-      }
-      if (layout[id] === 'y') {
-        element.add('y').remove('x');
-      }
-    });
-  }
+  const empty = Object.keys(board.layout).filter(id => board.layout[id] === '');
+  empty.forEach(id => $(`#${id}`).remove('x').remove('y').remove('picked'));
 
-  function renderPicked() {
-    const $ = window.jQuery;
-    const { picked, board } = Stage.get();
+  const xs = Object.keys(board.layout).filter(id => board.layout[id] === 'x');
+  xs.forEach(id => $(`#${id}`).add('x').remove('y').remove('picked'));
 
-    Object.keys(board.layout).forEach((id) => {
-      $(`#${id}`).remove('picked');
-    });
+  const ys = Object.keys(board.layout).filter(id => board.layout[id] === 'y');
+  ys.forEach(id => $(`#${id}`).add('y').remove('x').remove('picked'));
 
-    if (picked) {
-      $(`#${picked}`).add('picked');
-    }
-  }
+  $(`#${picked}`).add('picked');
+};
 
-  function render() {
-    if (dirty) {
-      renderBoard();
-      renderPicked();
-      dirty = false;
-    }
-
-    requestAnimationFrame(render);
-  }
-
-  function invalidate() {
-    dirty = true;
-  }
-
-  return {
-    render,
-    invalidate,
-  };
-}());
+Renderer.invalidate = () => {
+  requestAnimationFrame(Renderer.render);
+};
 
 const Game = (function game() {
   function onPick(element) {
@@ -508,7 +476,7 @@ const Game = (function game() {
     const { layout } = Stage.get().board;
     Object.keys(layout).forEach(id => $(`#${id}`).touch(onPick, onPlay));
 
-    Renderer.render();
+    Renderer.invalidate();
   }
 
   return {
