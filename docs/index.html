@@ -493,13 +493,13 @@ it can play our game against itself.</p>
     <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
       <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>);
       <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">''</span>) {
-        element.remove(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
+        element.remove(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'y'</span>);
       }
       <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">'x'</span>) {
-        element.add(<span class="hljs-string">'white'</span>).remove(<span class="hljs-string">'black'</span>);
+        element.add(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'y'</span>);
       }
       <span class="hljs-keyword">if</span> (layout[id] === <span class="hljs-string">'y'</span>) {
-        element.add(<span class="hljs-string">'black'</span>).remove(<span class="hljs-string">'white'</span>);
+        element.add(<span class="hljs-string">'y'</span>).remove(<span class="hljs-string">'x'</span>);
       }
     });
   }

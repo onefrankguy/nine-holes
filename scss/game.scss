@@ -87,13 +87,13 @@ $hole-size: ($font-size * 4);
   border-left: 1px solid black;
 }
 
-.space.black,
-.space.white {
+.space.x,
+.space.y {
   position: relative;
 }
 
-.space.black:before,
-.space.white:before {
+.space.x:before,
+.space.y:before {
   content: '';
   width: ($font-size / 2);
   height: ($font-size / 2);
@@ -103,23 +103,23 @@ $hole-size: ($font-size * 4);
   top: (($hole-size / 2) - ($font-size / 4));
 }
 
-.space.black:before {
+.space.y:before {
   border-radius: 50%;
 }
 
-.space.white:after,
-.space.black:after {
+.space.x:after,
+.space.y:after {
   content: '';
   border: .4rem solid black;
   width: ($hole-size / 2);
   height: ($hole-size / 2);
 }
 
-.space.white:after {
+.space.x:after {
   box-shadow: .2rem .2rem .5rem rgba(0,0,0,.3);
 }
 
-.space.black:after {
+.space.y:after {
   border-radius: 50%;
 }
 

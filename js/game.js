@@ -436,13 +436,13 @@ const Renderer = (function renderer() {
     Object.keys(layout).forEach((id) => {
       const element = $(`#${id}`);
       if (layout[id] === '') {
-        element.remove('white').remove('black');
+        element.remove('x').remove('y');
       }
       if (layout[id] === 'x') {
-        element.add('white').remove('black');
+        element.add('x').remove('y');
       }
       if (layout[id] === 'y') {
-        element.add('black').remove('white');
+        element.add('y').remove('x');
       }
     });
   }
