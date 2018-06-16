@@ -441,68 +441,27 @@ it can play our game against itself.</p>
           <div class='highlight'><pre>
 <span class="hljs-keyword">const</span> Engine = {};
 
-Engine.next = <span class="hljs-function">(<span class="hljs-params">board, move</span>) =&gt;</span> {
-  <span class="hljs-keyword">const</span> player = Board.player(board, move);
-  <span class="hljs-keyword">const</span> opponent = AI.opponent(player);
-
+Engine.tick = <span class="hljs-function">(<span class="hljs-params">board, player, start, end</span>) =&gt;</span> {
   <span class="hljs-keyword">if</span> (Rules.winner(board)) {
-    <span class="hljs-keyword">return</span> Board.clone(board);
+    <span class="hljs-keyword">return</span> [Board.clone(board), <span class="hljs-literal">undefined</span>];
   }
 
-  <span class="hljs-keyword">if</span> (Rules.moves(board, player).indexOf(move) &lt; <span class="hljs-number">0</span>) {
-    <span class="hljs-keyword">return</span> Board.clone(board);
+  <span class="hljs-keyword">let</span> move = <span class="hljs-string">`<span class="hljs-subst">${start}</span>-<span class="hljs-subst">${end}</span>`</span>;
+  <span class="hljs-keyword">if</span> (Rules.moves(board, player).indexOf(move) &gt; <span class="hljs-number">-1</span>) {
+    <span class="hljs-keyword">let</span> next = Board.move(board, [move]);
+
+    <span class="hljs-keyword">if</span> (Rules.winner(next) !== player) {
+      move = AI.move(next, AI.opponent(player));
+      next = Board.move(next, [move]);
+    }
+
+    <span class="hljs-keyword">return</span> [next, <span class="hljs-literal">undefined</span>];
   }
 
-  <span class="hljs-keyword">const</span> next = Board.move(board, [move]);
-  <span class="hljs-keyword">if</span> (Rules.winner(next) === player) {
-    <span class="hljs-keyword">return</span> next;
-  }
-
-  <span class="hljs-keyword">return</span> Board.move(next, [AI.move(next, opponent)]);
+  <span class="hljs-keyword">const</span> pickable = Rules.pickable(board, player);
+  <span class="hljs-keyword">const</span> picked = [end, start].filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> pickable.indexOf(space) &gt; <span class="hljs-number">-1</span>);
+  <span class="hljs-keyword">return</span> [Board.clone(board), ...picked];
 };
-
-<span class="hljs-keyword">const</span> Stage = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stage</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">let</span> board = Board.create();
-  <span class="hljs-keyword">let</span> picked;
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params"></span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify({ board, picked }));
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
-    board = Board.create();
-    picked = <span class="hljs-literal">undefined</span>;
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">message</span>) </span>{
-    <span class="hljs-keyword">const</span> pickable = Rules.pickable(board, <span class="hljs-string">'x'</span>).indexOf(message) &gt; <span class="hljs-number">-1</span>;
-
-    <span class="hljs-keyword">if</span> (!picked) {
-      <span class="hljs-keyword">if</span> (pickable) {
-        picked = message;
-      }
-      <span class="hljs-keyword">return</span>;
-    }
-
-    <span class="hljs-keyword">const</span> playable = Rules.playable(board).indexOf(message) &gt; <span class="hljs-number">-1</span>;
-
-    <span class="hljs-keyword">if</span> (!playable) {
-      <span class="hljs-keyword">if</span> (pickable) {
-        picked = message;
-      }
-      <span class="hljs-keyword">return</span>;
-    }
-
-    board = Engine.next(board, <span class="hljs-string">`<span class="hljs-subst">${picked}</span>-<span class="hljs-subst">${message}</span>`</span>);
-    picked = <span class="hljs-literal">undefined</span>;
-  }
-
-  <span class="hljs-keyword">return</span> {
-    get,
-    next,
-    reset,
-  };
-}());
 
 <span class="hljs-keyword">const</span> Renderer = {};
 
@@ -522,13 +481,24 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
 };
 
 <span class="hljs-keyword">const</span> Game = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">let</span> board = Board.create();
+  <span class="hljs-keyword">let</span> input = [];
+  <span class="hljs-keyword">let</span> picked;
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
+    board = Board.create();
+    input = [];
+    picked = <span class="hljs-literal">undefined</span>;
+  }
+
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPick</span>(<span class="hljs-params">element</span>) </span>{
     element.add(<span class="hljs-string">'picked'</span>);
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPlay</span>(<span class="hljs-params">element</span>) </span>{
-    Stage.next(element.unwrap().id);
-    <span class="hljs-keyword">const</span> { board, picked } = Stage.get();
+    input.push(element.unwrap().id);
+    [board, picked] = Engine.tick(board, <span class="hljs-string">'x'</span>, ...input);
+    input = picked ? [picked] : [];
     Renderer.invalidate(board, picked);
   }
 
@@ -538,8 +508,7 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offReset</span>(<span class="hljs-params">element</span>) </span>{
     element.remove(<span class="hljs-string">'picked'</span>);
-    Stage.reset();
-    <span class="hljs-keyword">const</span> { board, picked } = Stage.get();
+    reset();
     Renderer.invalidate(board, picked);
   }
 
@@ -548,10 +517,9 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
 
     $(<span class="hljs-string">'#reset'</span>).touch(onReset, offReset);
 
-    <span class="hljs-keyword">const</span> { layout } = Stage.get().board;
-    <span class="hljs-built_in">Object</span>.keys(layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).touch(onPick, onPlay));
+    <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).touch(onPick, onPlay));
 
-    <span class="hljs-keyword">const</span> { board, picked } = Stage.get();
+    reset();
     Renderer.invalidate(board, picked);
   }
 

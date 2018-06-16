@@ -384,68 +384,27 @@ AI.move = (board, player) => {
 
 const Engine = {};
 
-Engine.next = (board, move) => {
-  const player = Board.player(board, move);
-  const opponent = AI.opponent(player);
-
+Engine.tick = (board, player, start, end) => {
   if (Rules.winner(board)) {
-    return Board.clone(board);
+    return [Board.clone(board), undefined];
   }
 
-  if (Rules.moves(board, player).indexOf(move) < 0) {
-    return Board.clone(board);
+  let move = `${start}-${end}`;
+  if (Rules.moves(board, player).indexOf(move) > -1) {
+    let next = Board.move(board, [move]);
+
+    if (Rules.winner(next) !== player) {
+      move = AI.move(next, AI.opponent(player));
+      next = Board.move(next, [move]);
+    }
+
+    return [next, undefined];
   }
 
-  const next = Board.move(board, [move]);
-  if (Rules.winner(next) === player) {
-    return next;
-  }
-
-  return Board.move(next, [AI.move(next, opponent)]);
+  const pickable = Rules.pickable(board, player);
+  const picked = [end, start].filter(space => pickable.indexOf(space) > -1);
+  return [Board.clone(board), ...picked];
 };
-
-const Stage = (function stage() {
-  let board = Board.create();
-  let picked;
-
-  function get() {
-    return JSON.parse(JSON.stringify({ board, picked }));
-  }
-
-  function reset() {
-    board = Board.create();
-    picked = undefined;
-  }
-
-  function next(message) {
-    const pickable = Rules.pickable(board, 'x').indexOf(message) > -1;
-
-    if (!picked) {
-      if (pickable) {
-        picked = message;
-      }
-      return;
-    }
-
-    const playable = Rules.playable(board).indexOf(message) > -1;
-
-    if (!playable) {
-      if (pickable) {
-        picked = message;
-      }
-      return;
-    }
-
-    board = Engine.next(board, `${picked}-${message}`);
-    picked = undefined;
-  }
-
-  return {
-    get,
-    next,
-    reset,
-  };
-}());
 
 const Renderer = {};
 
@@ -465,13 +424,24 @@ Renderer.invalidate = (board, picked) => {
 };
 
 const Game = (function game() {
+  let board = Board.create();
+  let input = [];
+  let picked;
+
+  function reset() {
+    board = Board.create();
+    input = [];
+    picked = undefined;
+  }
+
   function onPick(element) {
     element.add('picked');
   }
 
   function onPlay(element) {
-    Stage.next(element.unwrap().id);
-    const { board, picked } = Stage.get();
+    input.push(element.unwrap().id);
+    [board, picked] = Engine.tick(board, 'x', ...input);
+    input = picked ? [picked] : [];
     Renderer.invalidate(board, picked);
   }
 
@@ -481,8 +451,7 @@ const Game = (function game() {
 
   function offReset(element) {
     element.remove('picked');
-    Stage.reset();
-    const { board, picked } = Stage.get();
+    reset();
     Renderer.invalidate(board, picked);
   }
 
@@ -491,10 +460,9 @@ const Game = (function game() {
 
     $('#reset').touch(onReset, offReset);
 
-    const { layout } = Stage.get().board;
-    Object.keys(layout).forEach(id => $(`#${id}`).touch(onPick, onPlay));
+    Object.keys(board.layout).forEach(id => $(`#${id}`).touch(onPick, onPlay));
 
-    const { board, picked } = Stage.get();
+    reset();
     Renderer.invalidate(board, picked);
   }
 
