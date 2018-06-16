@@ -22,29 +22,80 @@
 const Board = {};
 
 // <style>
-// td {
+// .board {
+//   display: inline-grid;
+//   grid-template-areas:
+//     ". . ."
+//     ". . ."
+//     ". . ."
+//     ". . ."
+//     ". . ."
+//     ;
+//   border-top: 1px solid gray;
+//   border-left: 1px solid gray;
+// }
+// .board > * {
+//   border-bottom: 1px solid gray;
+//   border-right: 1px solid gray;
+// }
+// .board > *,
+// .ranks > *,
+// .files > * {
 //   font: 1rem/1 sans-serif;
 //   width: 1.8rem;
 //   height: 1.8rem;
-//   border: 1px solid gray;
-//   text-align: center;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
 // }
-// td.label {
-//   border: none;
+// .layout {
+//   display: inline-grid;
+//   grid-template-areas:
+//     ". ."
+//     ". ."
+//     ;
+// }
+// .files {
+//   display: flex;
+//   flex-direction: row;
+// }
+// .x:after {
+//   content: 'x';
+// }
+// .y:after {
+//   content: 'y';
 // }
 // </style>
-
+//
 // When talking about board games, it's useful to be able to describe both the
 // players and the moves they make in shorthand. Chess notation used numbers for
 // ranks (rows) and letters for files (columns). So we can draw a 3 x 3 board
 // like this:
 //
-// <table>
-// <tr><td class="label">3</td><td></td><td></td><td></td></tr>
-// <tr><td class="label">2</td><td></td><td></td><td></td></tr>
-// <tr><td class="label">1</td><td></td><td></td><td></td></tr>
-// <tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
-// </table>
+// <div class="layout">
+// <div class="ranks">
+//   <div>3</div>
+//   <div>2</div>
+//   <div>1</div>
+// </div>
+// <div class="board">
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+// </div>
+// <div></div>
+// <div class="files">
+//   <div>a</div>
+//   <div>b</div>
+//   <div>c</div>
+// </div>
+// </div>
 //
 // We can reference any space on our board as a letter and number. So "a1" is
 // the space in the lower left corner, and "c3" is the space in the upper right
@@ -55,14 +106,38 @@ const Board = {};
 // other games, like Checkers, they do. Let's extend our board slightly so it
 // has starting spaces for the pieces.
 //
-// <table>
-// <tr><td class="label">5</td><td>y</td><td>y</td><td>y</td></tr>
-// <tr><td class="label">4</td><td></td><td></td><td></td></tr>
-// <tr><td class="label">3</td><td></td><td></td><td></td></tr>
-// <tr><td class="label">2</td><td></td><td></td><td></td></tr>
-// <tr><td class="label">1</td><td>x</td><td>x</td><td>x</td></tr>
-// <tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
-// </table>
+// <div class="layout">
+// <div class="ranks">
+//   <div>5</div>
+//   <div>4</div>
+//   <div>3</div>
+//   <div>2</div>
+//   <div>1</div>
+// </div>
+// <div class="board">
+//   <div class="y"></div>
+//   <div class="y"></div>
+//   <div class="y"></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div class="x"></div>
+//   <div class="x"></div>
+//   <div class="x"></div>
+// </div>
+// <div></div>
+// <div class="files">
+//   <div>a</div>
+//   <div>b</div>
+//   <div>c</div>
+// </div>
+// </div>
 //
 // Every time we start a new game, that's what we want the board to look like.
 // So let's give ourselves a way to create new game boards.
@@ -148,14 +223,38 @@ Board.player = (board, move) => {
 //
 // Here's the board after those two moves:
 //
-// <table>
-// <tr><td class="label">5</td><td>y</td><td></td><td>y</td></tr>
-// <tr><td class="label">4</td><td>y</td><td></td><td>x</td></tr>
-// <tr><td class="label">3</td><td></td><td></td><td></td></tr>
-// <tr><td class="label">2</td><td></td><td></td><td></td></tr>
-// <tr><td class="label">1</td><td></td><td>x</td><td>x</td></tr>
-// <tr><td class="label"></td><td class="label">a</td><td class="label">b</td><td class="label">c</td></tr>
-// </table>
+// <div class="layout">
+// <div class="ranks">
+//   <div>5</div>
+//   <div>4</div>
+//   <div>3</div>
+//   <div>2</div>
+//   <div>1</div>
+// </div>
+// <div class="board">
+//   <div class="y"></div>
+//   <div></div>
+//   <div class="y"></div>
+//   <div class="y"></div>
+//   <div></div>
+//   <div class="x"></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div class="x"></div>
+//   <div class="x"></div>
+// </div>
+// <div></div>
+// <div class="files">
+//   <div>a</div>
+//   <div>b</div>
+//   <div>c</div>
+// </div>
+// </div>
 //
 // What's the next move? X could play "b1-b4" and try to stack pieces on top of
 // each other. That would be illegal, but the `Board.move` function doesn't know
