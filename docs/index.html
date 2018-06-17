@@ -590,11 +590,11 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
     picked = <span class="hljs-literal">undefined</span>;
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPick</span>(<span class="hljs-params">element</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBoard</span>(<span class="hljs-params">element</span>) </span>{
     element.addClass(<span class="hljs-string">'picked'</span>);
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPlay</span>(<span class="hljs-params">element</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offBoard</span>(<span class="hljs-params">element</span>) </span>{
     input.push(element.unwrap().id);
     [board, picked] = Engine.tick(board, <span class="hljs-string">'x'</span>, ...input);
     input = picked ? [picked] : [];
@@ -616,7 +616,7 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
 
     $(<span class="hljs-string">'#reset'</span>).click(onReset, offReset);
 
-    <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).click(onPick, onPlay));
+    <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).click(onBoard, offBoard));
 
     reset();
     Renderer.invalidate(board, picked);

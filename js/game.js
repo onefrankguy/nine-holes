@@ -536,11 +536,11 @@ const Game = (function game() {
     picked = undefined;
   }
 
-  function onPick(element) {
+  function onBoard(element) {
     element.addClass('picked');
   }
 
-  function onPlay(element) {
+  function offBoard(element) {
     input.push(element.unwrap().id);
     [board, picked] = Engine.tick(board, 'x', ...input);
     input = picked ? [picked] : [];
@@ -562,7 +562,7 @@ const Game = (function game() {
 
     $('#reset').click(onReset, offReset);
 
-    Object.keys(board.layout).forEach(id => $(`#${id}`).click(onPick, onPlay));
+    Object.keys(board.layout).forEach(id => $(`#${id}`).click(onBoard, offBoard));
 
     reset();
     Renderer.invalidate(board, picked);
