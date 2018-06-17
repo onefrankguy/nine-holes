@@ -566,10 +566,13 @@ Renderer.render = <span class="hljs-function">(<span class="hljs-params">board, 
 
   <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
     <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>);
-    element.remove(<span class="hljs-string">'picked'</span>).remove(<span class="hljs-string">'x'</span>).remove(<span class="hljs-string">'y'</span>).add(board.layout[id]);
+    element.removeClass(<span class="hljs-string">'picked'</span>);
+    element.removeClass(<span class="hljs-string">'x'</span>);
+    element.removeClass(<span class="hljs-string">'y'</span>);
+    element.addClass(board.layout[id]);
   });
 
-  $(<span class="hljs-string">`#<span class="hljs-subst">${picked}</span>`</span>).add(<span class="hljs-string">'picked'</span>);
+  $(<span class="hljs-string">`#<span class="hljs-subst">${picked}</span>`</span>).addClass(<span class="hljs-string">'picked'</span>);
 };
 
 Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">board, picked</span>) =&gt;</span> {
@@ -588,7 +591,7 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPick</span>(<span class="hljs-params">element</span>) </span>{
-    element.add(<span class="hljs-string">'picked'</span>);
+    element.addClass(<span class="hljs-string">'picked'</span>);
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPlay</span>(<span class="hljs-params">element</span>) </span>{
@@ -599,11 +602,11 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onReset</span>(<span class="hljs-params">element</span>) </span>{
-    element.add(<span class="hljs-string">'picked'</span>);
+    element.addClass(<span class="hljs-string">'picked'</span>);
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offReset</span>(<span class="hljs-params">element</span>) </span>{
-    element.remove(<span class="hljs-string">'picked'</span>);
+    element.removeClass(<span class="hljs-string">'picked'</span>);
     reset();
     Renderer.invalidate(board, picked);
   }
@@ -611,9 +614,9 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
 
-    $(<span class="hljs-string">'#reset'</span>).touch(onReset, offReset);
+    $(<span class="hljs-string">'#reset'</span>).click(onReset, offReset);
 
-    <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).touch(onPick, onPlay));
+    <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).click(onPick, onPlay));
 
     reset();
     Renderer.invalidate(board, picked);
@@ -641,7 +644,7 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
   }
 
-  Fn.prototype.add = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">klass</span>) </span>{
+  Fn.prototype.addClass = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addClass</span>(<span class="hljs-params">klass</span>) </span>{
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.element &amp;&amp; <span class="hljs-keyword">this</span>.element.classList &amp;&amp; klass) {
       <span class="hljs-keyword">this</span>.element.classList.add(klass);
     }
@@ -649,7 +652,7 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
   };
 
-  Fn.prototype.remove = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">remove</span>(<span class="hljs-params">klass</span>) </span>{
+  Fn.prototype.removeClass = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeClass</span>(<span class="hljs-params">klass</span>) </span>{
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.element &amp;&amp; <span class="hljs-keyword">this</span>.element.classList) {
       <span class="hljs-keyword">this</span>.element.classList.remove(klass);
     }
@@ -657,7 +660,7 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
   };
 
-  Fn.prototype.touch = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">touch</span>(<span class="hljs-params">start, end</span>) </span>{
+  Fn.prototype.click = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">click</span>(<span class="hljs-params">start, end</span>) </span>{
     <span class="hljs-keyword">const</span> self = <span class="hljs-keyword">this</span>;
 
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.element) {

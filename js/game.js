@@ -512,10 +512,13 @@ Renderer.render = (board, picked) => {
 
   Object.keys(board.layout).forEach((id) => {
     const element = $(`#${id}`);
-    element.remove('picked').remove('x').remove('y').add(board.layout[id]);
+    element.removeClass('picked');
+    element.removeClass('x');
+    element.removeClass('y');
+    element.addClass(board.layout[id]);
   });
 
-  $(`#${picked}`).add('picked');
+  $(`#${picked}`).addClass('picked');
 };
 
 Renderer.invalidate = (board, picked) => {
@@ -534,7 +537,7 @@ const Game = (function game() {
   }
 
   function onPick(element) {
-    element.add('picked');
+    element.addClass('picked');
   }
 
   function onPlay(element) {
@@ -545,11 +548,11 @@ const Game = (function game() {
   }
 
   function onReset(element) {
-    element.add('picked');
+    element.addClass('picked');
   }
 
   function offReset(element) {
-    element.remove('picked');
+    element.removeClass('picked');
     reset();
     Renderer.invalidate(board, picked);
   }
@@ -557,9 +560,9 @@ const Game = (function game() {
   function play() {
     const $ = window.jQuery;
 
-    $('#reset').touch(onReset, offReset);
+    $('#reset').click(onReset, offReset);
 
-    Object.keys(board.layout).forEach(id => $(`#${id}`).touch(onPick, onPlay));
+    Object.keys(board.layout).forEach(id => $(`#${id}`).click(onPick, onPlay));
 
     reset();
     Renderer.invalidate(board, picked);
@@ -587,7 +590,7 @@ const Game = (function game() {
     return this;
   }
 
-  Fn.prototype.add = function add(klass) {
+  Fn.prototype.addClass = function addClass(klass) {
     if (this.element && this.element.classList && klass) {
       this.element.classList.add(klass);
     }
@@ -595,7 +598,7 @@ const Game = (function game() {
     return this;
   };
 
-  Fn.prototype.remove = function remove(klass) {
+  Fn.prototype.removeClass = function removeClass(klass) {
     if (this.element && this.element.classList) {
       this.element.classList.remove(klass);
     }
@@ -603,7 +606,7 @@ const Game = (function game() {
     return this;
   };
 
-  Fn.prototype.touch = function touch(start, end) {
+  Fn.prototype.click = function click(start, end) {
     const self = this;
 
     if (this.element) {
