@@ -1,7 +1,7 @@
-.DS_Store
-yarn.lock
-package-lock.json
-*.log
-morgue/
-public/
-node_modules/
+/.DS_Store
+/yarn.lock
+/package-lock.json
+/*.log
+/morgue
+/public
+/node_modules

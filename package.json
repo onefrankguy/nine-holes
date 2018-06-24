@@ -11,7 +11,7 @@
     "build:js": "mkdir -p public && uglifyjs js/*.js -m -c -o public/game.js",
     "docs": "rm -rf docs/* && docco -l linear js/*.js && mv docs/js/game.html docs/index.html",
     "lint": "eslint js/*.js 2>&1",
-    "postdocs": "sed -i .bak 's:public/:./public/:g' docs/*.css docs/*.html && sed -i .bak 's:../docco.css:./docco.css:g' docs/*.html && rm docs/*.bak",
+    "postdocs": "sed -i .bak 's:../docco.css:./docco.css:g' docs/*.html && rm docs/*.bak",
     "postbuild:js": "npm run docs",
     "scss": "node-sass --output-style compressed --omit-source-map-url -o public scss",
     "sync": "cd public && rsync -avz --delete --files-from=../manifest.txt ./ frankmitchell.org:/home/public/nine-holes/",
