@@ -692,7 +692,7 @@ Engine.tick = (board, player, start, end) => {
   return [Board.clone(board), ...picked];
 };
 
-const Game = (function game() {
+(function game() {
   let board = Board.create();
   let input = [];
   let picked;
@@ -735,9 +735,7 @@ const Game = (function game() {
     Renderer.invalidate(board, picked);
   }
 
-  return {
-    play,
-  };
+  window.onload = play;
 }());
 
 // <h2 id="appendix">Appendix: A Tiny jQuery Clone</h2>
@@ -827,5 +825,3 @@ const Game = (function game() {
 
   window.jQuery = root;
 }());
-
-Game.play();

@@ -710,7 +710,7 @@ Engine.tick = <span class="hljs-function">(<span class="hljs-params">board, play
   <span class="hljs-keyword">return</span> [Board.clone(board), ...picked];
 };
 
-<span class="hljs-keyword">const</span> Game = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
+(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> board = Board.create();
   <span class="hljs-keyword">let</span> input = [];
   <span class="hljs-keyword">let</span> picked;
@@ -753,9 +753,7 @@ Engine.tick = <span class="hljs-function">(<span class="hljs-params">board, play
     Renderer.invalidate(board, picked);
   }
 
-  <span class="hljs-keyword">return</span> {
-    play,
-  };
+  <span class="hljs-built_in">window</span>.onload = play;
 }());</pre></div>
         
       
@@ -848,9 +846,7 @@ Engine.tick = <span class="hljs-function">(<span class="hljs-params">board, play
   }
 
   <span class="hljs-built_in">window</span>.jQuery = root;
-}());
-
-Game.play();</pre></div>
+}());</pre></div>
         
       
       <div class="fleur">h</div>
