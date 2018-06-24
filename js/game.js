@@ -8,7 +8,7 @@
 // This is that game.
 //
 //
-// [Prolix]: http://prolix-app.com/ "Prolix is a word search game for the iPhone and iPod touch which lets you tweet your scores so your friends can play with you."
+// [Prolix]: https://prolix-app.com/ "Prolix is a word search game for the iPhone and iPod touch which lets you tweet your scores so your friends can play with you."
 //
 // ---
 //
