@@ -65,6 +65,9 @@ const Board = {};
 // .y:after {
 //   content: 'y';
 // }
+// .picked {
+//   background: pink;
+// }
 // </style>
 //
 // When talking about board games, it's useful to be able to describe both the
@@ -221,16 +224,206 @@ Board.player = (board, move) => {
 // }());
 // ```
 //
-// Here's the board after those two moves:
+// Our board looks like it's working, so let's put it on the screen.
 //
-// <div class="layout">
-// <div class="ranks">
-//   <div>5</div>
-//   <div>4</div>
-//   <div>3</div>
-//   <div>2</div>
-//   <div>1</div>
+// ---
+//
+// [Canvas][] and [WebGL][] are often used to render video games in the browser.
+// But for a game like ours, where the action isn't fast, HTML and CSS are quick
+// enough.
+//
+// We can draw our board using HTML `<div>` elements. Using `<div>`, instead of
+// a more semantic element like `<p>`, means we avoid browser quirks with
+// default CSS rules. Each space on the board  will have its own `<div>`
+// element. To make our board easy to reference and manipulate, we can give each
+// `<div>` an `id` attributes of the file and rank for that board space.
+//
+// [Canvas]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API "Various (MDN): Canvas API"
+// [WebGL]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API "Various (MDN): WebGL API: 2D and 3D graphics for the web"
+//
+// ```
+// <div class="board">
+//   <div id="a5"></div>
+//   <div id="b5"></div>
+//   <div id="c5"></div>
+//   <div id="a4"></div>
+//   <div id="b4"></div>
+//   <div id="c4"></div>
+//   <div id="a3"></div>
+//   <div id="b3"></div>
+//   <div id="c3"></div>
+//   <div id="a2"></div>
+//   <div id="b2"></div>
+//   <div id="c2"></div>
+//   <div id="a1"></div>
+//   <div id="b1"></div>
+//   <div id="c1"></div>
 // </div>
+// ```
+//
+// We can use [CSS Grid][] to position the board spaces and [CSS Flexbox][] to
+// keep the content in them centered. A border around the board spaces makes
+// them visible.
+//
+// [CSS Grid]: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout "Various (MDN): CSS Grid Layout"
+// [CSS Flexbox]: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout "Various (MDN): CSS Flexible Box Layout"
+//
+// ```
+// <style>
+// .board {
+//   display: inline-grid;
+//   grid-template-areas:
+//     ". . ."
+//     ". . ."
+//     ". . ."
+//     ". . ."
+//     ". . ."
+//     ;
+//   border-top: 1px solid gray;
+//   border-left: 1px solid gray;
+// }
+//
+// .board > * {
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   border-bottom: 1px solid gray;
+//   border-right: 1px solid gray;
+// }
+// </style>
+// ```
+//
+// With those rules in place, our board looks like this.
+//
+// <div class="board">
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+//   <div></div>
+// </div>
+//
+// It's tempting to use something like [jQuery's `.html()` function][html] to
+// update the HTML and place "x" and "y" text elements for the pieces.
+//
+// ```
+// (function testHtmlRendering() {
+//   window.jQuery('#a1').html('x');
+//   window.jQuery('#c5').html('y');
+// }());
+// ```
+//
+// But that kind of direct manipulation couples the display of the pieces to the
+// JavaScript code. Instead, we'll use CSS classes to render "x" and "y"
+// characters as pseudo elements. That way we can change the pieces later to
+// look like squares and circles by changing the CSS.
+//
+// [html]: https://api.jquery.com/html/ "Various (jQuery): jQuery API Documentation - .html()"
+//
+// ```
+// <style>
+// .x:after {
+//   content: 'x';
+// }
+//
+// .y:after {
+//   content: 'y';
+// }
+// </style>
+// ```
+//
+// Instead of `.html()` we can use [jQuery's `.addClass()` function][addClass]
+// to render pieces.
+//
+// [addClass]: https://api.jquery.com/addClass/ "Various (jQuery): jQuery API Documentation - .addClass()"
+//
+// ```
+// (function testCssRendering() {
+//   window.jQuery('#a1').addClass('x');
+//   window.jQuery('#c5').addClass('y');
+// }());
+// ```
+//
+// The other thing we need to figure out is user feedback. We can set a `picked`
+// class on board spaces when the user selects them, and change the background
+// color to show they've been picked.
+//
+// ```
+// <style>
+// .picked {
+//   background: pink;
+// }
+// </style>
+// ```
+//
+// So how do we render a board with pieces on It?
+//
+// Well the keys in our `board.layout` hash match the `id` elements of our board
+// HTML. And the values in our `board.layout` hash match the classes we use for
+// styling board spaces. So we can render a board by iterating through its
+// layout.
+
+const Renderer = {};
+
+Renderer.render = (board, picked) => {
+  const $ = window.jQuery;
+
+  Object.keys(board.layout).forEach((id) => {
+    const element = $(`#${id}`);
+    element.removeClass('picked');
+    element.removeClass('x');
+    element.removeClass('y');
+    element.addClass(board.layout[id]);
+  });
+
+  $(`#${picked}`).addClass('picked');
+};
+
+// We use the `removeClass` function to clear any `x`, `y`, or `picked` classes
+// that might have been previously set. That way the board renders cleanly each
+// time. We also add the `picked` class to any picked element. It's okay if
+// there's no picked element. An `$('#undefined')` call won't find anything, so
+// nothing gets picked.
+//
+// To keep the rendered board up to date, we could use a loop and redraw it
+// periodically. However, we only really need to redraw the board when something
+// changes. So we'll give ourselves a way to invalidate the rendering and
+// trigger a redraw.
+
+Renderer.invalidate = (board, picked) => {
+  requestAnimationFrame(() => Renderer.render(board, picked));
+};
+
+// Using [`requestAnimationFrame`][raf] lets the browser queue all our style
+// changes and apply them before the next repaint. With more time sensitive
+// animations, this helps avoid flickering.
+//
+// [raf]: https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame "Various (MDN): window.requestAnimationFrame"
+//
+// Let's run the same test as before, but this time we'll render the board.
+//
+// ```
+// (function testRenderer() {
+//   const starting = Board.create();
+//   Renderer.invalidate(starting);
+//
+//   const playing = Board.move(starting, ['a1-c4', 'b5-a4']);
+//   Renderer.invalidate(playing, 'b1');
+// }());
+// ```
+//
+// Here's what that looks like.
+//
 // <div class="board">
 //   <div class="y"></div>
 //   <div></div>
@@ -245,22 +438,16 @@ Board.player = (board, move) => {
 //   <div></div>
 //   <div></div>
 //   <div></div>
+//   <div class="x picked"></div>
 //   <div class="x"></div>
-//   <div class="x"></div>
-// </div>
-// <div></div>
-// <div class="files">
-//   <div>a</div>
-//   <div>b</div>
-//   <div>c</div>
-// </div>
 // </div>
 //
-// What's the next move? X could play "b1-b4" and try to stack pieces on top of
-// each other. That would be illegal, but the `Board.move` function doesn't know
-// the rules of the game. Just like how we don't want the board to know or care
-// how it's displayed, we also don't want it to know or care about rules. We'll
-// figure those out next.
+// So what's the next move?
+//
+// X could play "b1-c4" and try to stack pieces on top of each other. That would
+// be illegal, but the `Board.move` function doesn't know the rules of the game.
+// Just like how we don't want the board to know or care how it's displayed, we
+// also don't want it to know or care about rules. We'll figure those out next.
 
 const Rules = {};
 
@@ -505,26 +692,6 @@ Engine.tick = (board, player, start, end) => {
   return [Board.clone(board), ...picked];
 };
 
-const Renderer = {};
-
-Renderer.render = (board, picked) => {
-  const $ = window.jQuery;
-
-  Object.keys(board.layout).forEach((id) => {
-    const element = $(`#${id}`);
-    element.removeClass('picked');
-    element.removeClass('x');
-    element.removeClass('y');
-    element.addClass(board.layout[id]);
-  });
-
-  $(`#${picked}`).addClass('picked');
-};
-
-Renderer.invalidate = (board, picked) => {
-  requestAnimationFrame(() => Renderer.render(board, picked));
-};
-
 const Game = (function game() {
   let board = Board.create();
   let input = [];
@@ -572,6 +739,8 @@ const Game = (function game() {
     play,
   };
 }());
+
+// <h2 id="appendix">Appendix: A Tiny jQuery Clone</h2>
 
 (function $() {
   function Fn(selector) {

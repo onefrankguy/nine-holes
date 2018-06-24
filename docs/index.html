@@ -88,6 +88,9 @@ moved after they’re played.</p>
 .y:after {
   content: 'y';
 }
+.picked {
+  background: pink;
+}
 </style>
 
 <p>When talking about board games, it’s useful to be able to describe both the
@@ -243,15 +246,170 @@ two moves on it, and see how the board changes.</p>
   assert(playing[<span class="hljs-string">'b5'</span>] === <span class="hljs-string">''</span>);
   assert(playing[<span class="hljs-string">'a4'</span>] === <span class="hljs-string">'y'</span>);
 }());
-</code></pre><p>Here’s the board after those two moves:</p>
-<div class="layout">
-<div class="ranks">
-  <div>5</div>
-  <div>4</div>
-  <div>3</div>
-  <div>2</div>
-  <div>1</div>
+</code></pre><p>Our board looks like it’s working, so let’s put it on the screen.</p>
+<hr>
+
+        
+      
+        
+        <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API" title="Various (MDN): Canvas API">Canvas</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API" title="Various (MDN): WebGL API: 2D and 3D graphics for the web">WebGL</a> are often used to render video games in the browser.
+But for a game like ours, where the action isn’t fast, HTML and CSS are quick
+enough.</p>
+<p>We can draw our board using HTML <code>&lt;div&gt;</code> elements. Using <code>&lt;div&gt;</code>, instead of
+a more semantic element like <code>&lt;p&gt;</code>, means we avoid browser quirks with
+default CSS rules. Each space on the board  will have its own <code>&lt;div&gt;</code>
+element. To make our board easy to reference and manipulate, we can give each
+<code>&lt;div&gt;</code> an <code>id</code> attributes of the file and rank for that board space.</p>
+<pre><code>&lt;div <span class="hljs-class"><span class="hljs-keyword">class</span></span>=<span class="hljs-string">"board"</span>&gt;
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"a5"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"b5"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"c5"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"a4"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"b4"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"c4"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"a3"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"b3"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"c3"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"a2"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"b2"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"c2"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"a1"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"b1"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  &lt;div id=<span class="hljs-string">"c1"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+&lt;<span class="hljs-regexp">/div&gt;</span>
+</code></pre><p>We can use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout" title="Various (MDN): CSS Grid Layout">CSS Grid</a> to position the board spaces and <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout" title="Various (MDN): CSS Flexible Box Layout">CSS Flexbox</a> to
+keep the content in them centered. A border around the board spaces makes
+them visible.</p>
+<pre><code>&lt;style&gt;
+.board {
+  <span class="hljs-attr">display</span>: inline-grid;
+  grid-template-areas:
+    <span class="hljs-string">". . ."</span>
+    <span class="hljs-string">". . ."</span>
+    <span class="hljs-string">". . ."</span>
+    <span class="hljs-string">". . ."</span>
+    <span class="hljs-string">". . ."</span>
+    ;
+  border-top: <span class="hljs-number">1</span>px solid gray;
+  border-left: <span class="hljs-number">1</span>px solid gray;
+}
+
+.board &gt; * {
+  <span class="hljs-attr">display</span>: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: <span class="hljs-number">1</span>px solid gray;
+  border-right: <span class="hljs-number">1</span>px solid gray;
+}
+&lt;<span class="hljs-regexp">/style&gt;</span>
+</code></pre><p>With those rules in place, our board looks like this.</p>
+<div class="board">
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
 </div>
+
+<p>It’s tempting to use something like <a href="https://api.jquery.com/html/" title="Various (jQuery): jQuery API Documentation - .html()">jQuery’s <code>.html()</code> function</a> to
+update the HTML and place “x” and “y” text elements for the pieces.</p>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testHtmlRendering</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#a1'</span>).html(<span class="hljs-string">'x'</span>);
+  <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#c5'</span>).html(<span class="hljs-string">'y'</span>);
+}());
+</code></pre><p>But that kind of direct manipulation couples the display of the pieces to the
+JavaScript code. Instead, we’ll use CSS classes to render “x” and “y”
+characters as pseudo elements. That way we can change the pieces later to
+look like squares and circles by changing the CSS.</p>
+<pre><code>&lt;style&gt;
+.x:after {
+  <span class="hljs-attr">content</span>: <span class="hljs-string">'x'</span>;
+}
+
+.y:after {
+  <span class="hljs-attr">content</span>: <span class="hljs-string">'y'</span>;
+}
+&lt;<span class="hljs-regexp">/style&gt;</span>
+</code></pre><p>Instead of <code>.html()</code> we can use <a href="https://api.jquery.com/addClass/" title="Various (jQuery): jQuery API Documentation - .addClass()">jQuery’s <code>.addClass()</code> function</a>
+to render pieces.</p>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testCssRendering</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#a1'</span>).addClass(<span class="hljs-string">'x'</span>);
+  <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#c5'</span>).addClass(<span class="hljs-string">'y'</span>);
+}());
+</code></pre><p>The other thing we need to figure out is user feedback. We can set a <code>picked</code>
+class on board spaces when the user selects them, and change the background
+color to show they’ve been picked.</p>
+<pre><code>&lt;style&gt;
+.picked {
+  <span class="hljs-attr">background</span>: pink;
+}
+&lt;<span class="hljs-regexp">/style&gt;</span>
+</code></pre><p>So how do we render a board with pieces on It?</p>
+<p>Well the keys in our <code>board.layout</code> hash match the <code>id</code> elements of our board
+HTML. And the values in our <code>board.layout</code> hash match the classes we use for
+styling board spaces. So we can render a board by iterating through its
+layout.</p>
+
+        
+          <div class='highlight'><pre>
+<span class="hljs-keyword">const</span> Renderer = {};
+
+Renderer.render = <span class="hljs-function">(<span class="hljs-params">board, picked</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
+
+  <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>);
+    element.removeClass(<span class="hljs-string">'picked'</span>);
+    element.removeClass(<span class="hljs-string">'x'</span>);
+    element.removeClass(<span class="hljs-string">'y'</span>);
+    element.addClass(board.layout[id]);
+  });
+
+  $(<span class="hljs-string">`#<span class="hljs-subst">${picked}</span>`</span>).addClass(<span class="hljs-string">'picked'</span>);
+};</pre></div>
+        
+      
+        
+        <p>We use the <code>removeClass</code> function to clear any <code>x</code>, <code>y</code>, or <code>picked</code> classes
+that might have been previously set. That way the board renders cleanly each
+time. We also add the <code>picked</code> class to any picked element. It’s okay if
+there’s no picked element. An <code>$(&#39;#undefined&#39;)</code> call won’t find anything, so
+nothing gets picked.</p>
+<p>To keep the rendered board up to date, we could use a loop and redraw it
+periodically. However, we only really need to redraw the board when something
+changes. So we’ll give ourselves a way to invalidate the rendering and
+trigger a redraw.</p>
+
+        
+          <div class='highlight'><pre>
+Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">board, picked</span>) =&gt;</span> {
+  requestAnimationFrame(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> Renderer.render(board, picked));
+};</pre></div>
+        
+      
+        
+        <p>Using <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame" title="Various (MDN): window.requestAnimationFrame"><code>requestAnimationFrame</code></a> lets the browser queue all our style
+changes and apply them before the next repaint. With more time sensitive
+animations, this helps avoid flickering.</p>
+<p>Let’s run the same test as before, but this time we’ll render the board.</p>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testRenderer</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> starting = Board.create();
+  Renderer.invalidate(starting);
+
+  <span class="hljs-keyword">const</span> playing = Board.move(starting, [<span class="hljs-string">'a1-c4'</span>, <span class="hljs-string">'b5-a4'</span>]);
+  Renderer.invalidate(playing, <span class="hljs-string">'b1'</span>);
+}());
+</code></pre><p>Here’s what that looks like.</p>
 <div class="board">
   <div class="y"></div>
   <div></div>
@@ -266,22 +424,15 @@ two moves on it, and see how the board changes.</p>
   <div></div>
   <div></div>
   <div></div>
+  <div class="x picked"></div>
   <div class="x"></div>
-  <div class="x"></div>
-</div>
-<div></div>
-<div class="files">
-  <div>a</div>
-  <div>b</div>
-  <div>c</div>
-</div>
 </div>
 
-<p>What’s the next move? X could play “b1-b4” and try to stack pieces on top of
-each other. That would be illegal, but the <code>Board.move</code> function doesn’t know
-the rules of the game. Just like how we don’t want the board to know or care
-how it’s displayed, we also don’t want it to know or care about rules. We’ll
-figure those out next.</p>
+<p>So what’s the next move?</p>
+<p>X could play “b1-c4” and try to stack pieces on top of each other. That would
+be illegal, but the <code>Board.move</code> function doesn’t know the rules of the game.
+Just like how we don’t want the board to know or care how it’s displayed, we
+also don’t want it to know or care about rules. We’ll figure those out next.</p>
 
         
           <div class='highlight'><pre>
@@ -559,26 +710,6 @@ Engine.tick = <span class="hljs-function">(<span class="hljs-params">board, play
   <span class="hljs-keyword">return</span> [Board.clone(board), ...picked];
 };
 
-<span class="hljs-keyword">const</span> Renderer = {};
-
-Renderer.render = <span class="hljs-function">(<span class="hljs-params">board, picked</span>) =&gt;</span> {
-  <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
-
-  <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
-    <span class="hljs-keyword">const</span> element = $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>);
-    element.removeClass(<span class="hljs-string">'picked'</span>);
-    element.removeClass(<span class="hljs-string">'x'</span>);
-    element.removeClass(<span class="hljs-string">'y'</span>);
-    element.addClass(board.layout[id]);
-  });
-
-  $(<span class="hljs-string">`#<span class="hljs-subst">${picked}</span>`</span>).addClass(<span class="hljs-string">'picked'</span>);
-};
-
-Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">board, picked</span>) =&gt;</span> {
-  requestAnimationFrame(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> Renderer.render(board, picked));
-};
-
 <span class="hljs-keyword">const</span> Game = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> board = Board.create();
   <span class="hljs-keyword">let</span> input = [];
@@ -625,8 +756,14 @@ Renderer.invalidate = <span class="hljs-function">(<span class="hljs-params">boa
   <span class="hljs-keyword">return</span> {
     play,
   };
-}());
+}());</pre></div>
+        
+      
+        
+        <h2 id="appendix">Appendix: A Tiny jQuery Clone</h2>
 
+        
+          <div class='highlight'><pre>
 (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">$</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Fn</span>(<span class="hljs-params">selector</span>) </span>{
     <span class="hljs-keyword">if</span> (selector <span class="hljs-keyword">instanceof</span> Fn) {
