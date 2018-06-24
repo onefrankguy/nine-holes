@@ -4,8 +4,8 @@
 <head>
   <title>game.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
-  <link rel="stylesheet" media="all" href="docco.css" />
+  <link rel="stylesheet" media="all" href="./public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="./docco.css" />
 </head>
 <body>
   <div class="container">
@@ -245,8 +245,7 @@ two moves on it, and see how the board changes.</p>
   assert(playing[<span class="hljs-string">'c4'</span>] === <span class="hljs-string">'x'</span>);
   assert(playing[<span class="hljs-string">'b5'</span>] === <span class="hljs-string">''</span>);
   assert(playing[<span class="hljs-string">'a4'</span>] === <span class="hljs-string">'y'</span>);
-}());
-</code></pre><p>Our board looks like it’s working, so let’s put it on the screen.</p>
+}());</code></pre><p>Our board looks like it’s working, so let’s put it on the screen.</p>
 <hr>
 
         
@@ -276,8 +275,7 @@ element. To make our board easy to reference and manipulate, we can give each
   &lt;div id=<span class="hljs-string">"a1"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
   &lt;div id=<span class="hljs-string">"b1"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
   &lt;div id=<span class="hljs-string">"c1"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
-&lt;<span class="hljs-regexp">/div&gt;</span>
-</code></pre><p>We can use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout" title="Various (MDN): CSS Grid Layout">CSS Grid</a> to position the board spaces and <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout" title="Various (MDN): CSS Flexible Box Layout">CSS Flexbox</a> to
+&lt;<span class="hljs-regexp">/div&gt;</span></code></pre><p>We can use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout" title="Various (MDN): CSS Grid Layout">CSS Grid</a> to position the board spaces and <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout" title="Various (MDN): CSS Flexible Box Layout">CSS Flexbox</a> to
 keep the content in them centered. A border around the board spaces makes
 them visible.</p>
 <pre><code>&lt;style&gt;
@@ -301,8 +299,7 @@ them visible.</p>
   border-bottom: <span class="hljs-number">1</span>px solid gray;
   border-right: <span class="hljs-number">1</span>px solid gray;
 }
-&lt;<span class="hljs-regexp">/style&gt;</span>
-</code></pre><p>With those rules in place, our board looks like this.</p>
+&lt;<span class="hljs-regexp">/style&gt;</span></code></pre><p>With those rules in place, our board looks like this.</p>
 <div class="board">
   <div></div>
   <div></div>
@@ -326,8 +323,7 @@ update the HTML and place “x” and “y” text elements for the pieces.</p>
 <pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testHtmlRendering</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#a1'</span>).html(<span class="hljs-string">'x'</span>);
   <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#c5'</span>).html(<span class="hljs-string">'y'</span>);
-}());
-</code></pre><p>But that kind of direct manipulation couples the display of the pieces to the
+}());</code></pre><p>But that kind of direct manipulation couples the display of the pieces to the
 JavaScript code. Instead, we’ll use CSS classes to render “x” and “y”
 characters as pseudo elements. That way we can change the pieces later to
 look like squares and circles by changing the CSS.</p>
@@ -339,22 +335,19 @@ look like squares and circles by changing the CSS.</p>
 .y:after {
   <span class="hljs-attr">content</span>: <span class="hljs-string">'y'</span>;
 }
-&lt;<span class="hljs-regexp">/style&gt;</span>
-</code></pre><p>Instead of <code>.html()</code> we can use <a href="https://api.jquery.com/addClass/" title="Various (jQuery): jQuery API Documentation - .addClass()">jQuery’s <code>.addClass()</code> function</a>
+&lt;<span class="hljs-regexp">/style&gt;</span></code></pre><p>Instead of <code>.html()</code> we can use <a href="https://api.jquery.com/addClass/" title="Various (jQuery): jQuery API Documentation - .addClass()">jQuery’s <code>.addClass()</code> function</a>
 to render pieces.</p>
 <pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testCssRendering</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#a1'</span>).addClass(<span class="hljs-string">'x'</span>);
   <span class="hljs-built_in">window</span>.jQuery(<span class="hljs-string">'#c5'</span>).addClass(<span class="hljs-string">'y'</span>);
-}());
-</code></pre><p>The other thing we need to figure out is user feedback. We can set a <code>picked</code>
+}());</code></pre><p>The other thing we need to figure out is user feedback. We can set a <code>picked</code>
 class on board spaces when the user selects them, and change the background
 color to show they’ve been picked.</p>
 <pre><code>&lt;style&gt;
 .picked {
   <span class="hljs-attr">background</span>: pink;
 }
-&lt;<span class="hljs-regexp">/style&gt;</span>
-</code></pre><p>So how do we render a board with pieces on It?</p>
+&lt;<span class="hljs-regexp">/style&gt;</span></code></pre><p>So how do we render a board with pieces on It?</p>
 <p>Well the keys in our <code>board.layout</code> object match the <code>id</code> elements of our
 board HTML. And the values in our <code>board.layout</code> object match the classes we
 use for styling board spaces. So we can render a board by iterating through
@@ -408,8 +401,7 @@ animations, this helps avoid flickering.</p>
 
   <span class="hljs-keyword">const</span> playing = Board.move(starting, [<span class="hljs-string">'a1-c4'</span>, <span class="hljs-string">'b5-a4'</span>]);
   Renderer.invalidate(playing, <span class="hljs-string">'b1'</span>);
-}());
-</code></pre><p>Here’s what that looks like.</p>
+}());</code></pre><p>Here’s what that looks like.</p>
 <div class="board">
   <div class="y"></div>
   <div></div>
@@ -506,8 +498,7 @@ allowed moves.</p>
   <span class="hljs-keyword">const</span> moves = Rules.moves(playing, <span class="hljs-string">'x'</span>);
 
   assert(moves.length === <span class="hljs-number">21</span>);
-}());
-</code></pre><p>The game is over when either player wins by getting three of their pieces in
+}());</code></pre><p>The game is over when either player wins by getting three of their pieces in
 a row. Diagonals don’t count though, and we don’t want to include pieces in
 starting spaces.</p>
 
@@ -574,8 +565,7 @@ copies of the ranks and files from the board without changing it.</p>
 
   <span class="hljs-keyword">const</span> diagonal = Board.move(starting, [<span class="hljs-string">'a1-a2'</span>, <span class="hljs-string">'b1-b3'</span>, <span class="hljs-string">'c1-c4'</span>]);
   assert(Rules.winner(diagonal) === <span class="hljs-literal">undefined</span>);
-}());
-</code></pre><p>There are other edge cases we could cover, like three in a row vertically
+}());</code></pre><p>There are other edge cases we could cover, like three in a row vertically
 where one of the pieces is in a starting space. But the goal here isn’t
 exhaustive test coverage. Often the best way to test a game is to start
 playing it. To do that, we’ll need an oppontent.</p>
@@ -688,8 +678,7 @@ it can play our game against itself.</p>
   }
 
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${winner}</span> wins!`</span>);
-}());
-</code></pre>
+}());</code></pre>
         
           <div class='highlight'><pre>
 <span class="hljs-keyword">const</span> Engine = {};
