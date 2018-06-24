@@ -368,10 +368,10 @@ Board.player = (board, move) => {
 //
 // So how do we render a board with pieces on It?
 //
-// Well the keys in our `board.layout` hash match the `id` elements of our board
-// HTML. And the values in our `board.layout` hash match the classes we use for
-// styling board spaces. So we can render a board by iterating through its
-// layout.
+// Well the keys in our `board.layout` object match the `id` elements of our
+// board HTML. And the values in our `board.layout` object match the classes we
+// use for styling board spaces. So we can render a board by iterating through
+// its layout.
 
 const Renderer = {};
 
@@ -448,6 +448,10 @@ Renderer.invalidate = (board, picked) => {
 // be illegal, but the `Board.move` function doesn't know the rules of the game.
 // Just like how we don't want the board to know or care how it's displayed, we
 // also don't want it to know or care about rules. We'll figure those out next.
+//
+// ---
+//
+// Let's write some rules.
 
 const Rules = {};
 

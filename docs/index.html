@@ -355,10 +355,10 @@ color to show they’ve been picked.</p>
 }
 &lt;<span class="hljs-regexp">/style&gt;</span>
 </code></pre><p>So how do we render a board with pieces on It?</p>
-<p>Well the keys in our <code>board.layout</code> hash match the <code>id</code> elements of our board
-HTML. And the values in our <code>board.layout</code> hash match the classes we use for
-styling board spaces. So we can render a board by iterating through its
-layout.</p>
+<p>Well the keys in our <code>board.layout</code> object match the <code>id</code> elements of our
+board HTML. And the values in our <code>board.layout</code> object match the classes we
+use for styling board spaces. So we can render a board by iterating through
+its layout.</p>
 
         
           <div class='highlight'><pre>
@@ -433,6 +433,12 @@ animations, this helps avoid flickering.</p>
 be illegal, but the <code>Board.move</code> function doesn’t know the rules of the game.
 Just like how we don’t want the board to know or care how it’s displayed, we
 also don’t want it to know or care about rules. We’ll figure those out next.</p>
+<hr>
+
+        
+      
+        
+        <p>Let’s write some rules.</p>
 
         
           <div class='highlight'><pre>
