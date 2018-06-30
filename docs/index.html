@@ -125,7 +125,7 @@ like this:</p>
 <p>We can reference any space on our board as a letter and number. So “a1” is
 the space in the lower left corner, and “c3” is the space in the upper right
 corner.</p>
-<p>Since we used “a” and “b” as column labels, so we’ll use X and Y for the
+<p>Since we used “a” and “b” as column labels, we’ll use X and Y for the
 players. In our game, players don’t start with pieces on the board. But in
 other games, like Checkers, they do. Let’s extend our board slightly so it
 has starting spaces for the pieces.</p>
@@ -219,7 +219,7 @@ Board.move = <span class="hljs-function">(<span class="hljs-params">board, moves
 };
 
 Board.player = <span class="hljs-function">(<span class="hljs-params">board, move</span>) =&gt;</span> {
-  <span class="hljs-keyword">const</span> [start] = move.split(<span class="hljs-string">'-'</span>);
+  <span class="hljs-keyword">const</span> start = move.slice(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>);
   <span class="hljs-keyword">return</span> board.layout[start];
 };</pre></div>
         
@@ -257,7 +257,7 @@ enough.</p>
 <p>We can draw our board using HTML <code>&lt;div&gt;</code> elements. Using <code>&lt;div&gt;</code>, instead of
 a more semantic element like <code>&lt;p&gt;</code>, means we avoid browser quirks with
 default CSS rules. Each space on the board  will have its own <code>&lt;div&gt;</code>
-element. To make our board easy to reference and manipulate, we can give each
+element. To make our board easy to reference and manipulate, we’ll give each
 <code>&lt;div&gt;</code> an <code>id</code> attributes of the file and rank for that board space.</p>
 <pre><code>&lt;div <span class="hljs-class"><span class="hljs-keyword">class</span></span>=<span class="hljs-string">"board"</span>&gt;
   <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"a5"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
@@ -348,10 +348,10 @@ color to show they’ve been picked.</p>
   <span class="hljs-attr">background</span>: pink;
 }
 &lt;<span class="hljs-regexp">/style&gt;</span></code></pre><p>So how do we render a board with pieces on It?</p>
-<p>Well the keys in our <code>board.layout</code> object match the <code>id</code> elements of our
-board HTML. And the values in our <code>board.layout</code> object match the classes we
-use for styling board spaces. So we can render a board by iterating through
-its layout.</p>
+<p>The keys in our <code>board.layout</code> object match the <code>id</code> elements of our board
+HTML. And the values in our <code>board.layout</code> object match the classes we use
+for styling board spaces. So we can render a board by iterating through its
+layout.</p>
 
         
           <div class='highlight'><pre>
@@ -621,7 +621,7 @@ find moves that originate from a starting space.</p>
 AI.starting = <span class="hljs-function">(<span class="hljs-params">board, player</span>) =&gt;</span> {
   <span class="hljs-keyword">const</span> moves = Rules.moves(board, player);
   <span class="hljs-keyword">const</span> starting = Rules.starting(board);
-  <span class="hljs-keyword">return</span> moves.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> starting.indexOf(move.split(<span class="hljs-string">'-'</span>)[<span class="hljs-number">0</span>]) &gt; <span class="hljs-number">0</span>);
+  <span class="hljs-keyword">return</span> moves.filter(<span class="hljs-function"><span class="hljs-params">move</span> =&gt;</span> starting.indexOf(move.slice(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>)) &gt; <span class="hljs-number">0</span>);
 };</pre></div>
         
       

@@ -104,7 +104,7 @@ const Board = {};
 // the space in the lower left corner, and "c3" is the space in the upper right
 // corner.
 //
-// Since we used "a" and "b" as column labels, so we'll use X and Y for the
+// Since we used "a" and "b" as column labels, we'll use X and Y for the
 // players. In our game, players don't start with pieces on the board. But in
 // other games, like Checkers, they do. Let's extend our board slightly so it
 // has starting spaces for the pieces.
@@ -194,7 +194,7 @@ Board.move = (board, moves) => {
 };
 
 Board.player = (board, move) => {
-  const [start] = move.split('-');
+  const start = move.slice(0, 2);
   return board.layout[start];
 };
 
@@ -235,7 +235,7 @@ Board.player = (board, move) => {
 // We can draw our board using HTML `<div>` elements. Using `<div>`, instead of
 // a more semantic element like `<p>`, means we avoid browser quirks with
 // default CSS rules. Each space on the board  will have its own `<div>`
-// element. To make our board easy to reference and manipulate, we can give each
+// element. To make our board easy to reference and manipulate, we'll give each
 // `<div>` an `id` attributes of the file and rank for that board space.
 //
 // [Canvas]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API "Various (MDN): Canvas API"
@@ -368,10 +368,10 @@ Board.player = (board, move) => {
 //
 // So how do we render a board with pieces on It?
 //
-// Well the keys in our `board.layout` object match the `id` elements of our
-// board HTML. And the values in our `board.layout` object match the classes we
-// use for styling board spaces. So we can render a board by iterating through
-// its layout.
+// The keys in our `board.layout` object match the `id` elements of our board
+// HTML. And the values in our `board.layout` object match the classes we use
+// for styling board spaces. So we can render a board by iterating through its
+// layout.
 
 const Renderer = {};
 
@@ -616,7 +616,7 @@ AI.blocking = (board, player) => {
 AI.starting = (board, player) => {
   const moves = Rules.moves(board, player);
   const starting = Rules.starting(board);
-  return moves.filter(move => starting.indexOf(move.split('-')[0]) > 0);
+  return moves.filter(move => starting.indexOf(move.slice(0, 2)) > 0);
 };
 
 // Our AI is simple. It plays a winning move if it sees one. Otherwise it plays
