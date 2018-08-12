@@ -192,11 +192,6 @@ Board.move = (board, moves) => {
   return copy;
 };
 
-Board.player = (board, move) => {
-  const start = move.slice(0, 2);
-  return board.layout[start];
-};
-
 // The `Board.move` function uses `JSON.stringify` and `JSON.parse` to make a
 // deep copy of a boad before updating it. This keeps the function pure. The
 // same board and the same moves always give the same output. Pure functions
