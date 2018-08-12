@@ -93,7 +93,7 @@ moved after they’re played.</p>
 }
 </style>
 
-<p>When talking about board games, it’s useful to be able to describe both the
+<p>When talking about board games, it’s useful to be able to describe the
 players and the moves they make in shorthand. Chess notation used numbers for
 ranks (rows) and letters for files (columns). So we can draw a 3 x 3 board
 like this:</p>
@@ -194,9 +194,8 @@ Board.create = <span class="hljs-function"><span class="hljs-params">()</span> =
       
         
         <p>The <code>Board.create</code> function returns everything we need to draw a picture of
-the game. The board shouldn’t know or care how it’s rendered. For all it
-knows, we could be playing this game on a terminal and drawing it out in
-ASCII text.</p>
+the game. The board shouldn’t care how it’s rendered. For all it knows, we
+could be playing this game on a terminal and drawing it with ASCII text.</p>
 <p>Now that we can draw the board, we need a way to move pieces around it. If X
 starts by moving from a1 to c4, we can write that as “a1-c4”. If Y responds
 by moving b5 to a4, we can write that as “b5-a4”. We can keep both those
@@ -577,7 +576,8 @@ playing it. To do that, we’ll need an oppontent.</p>
         <p>Let’s write an AI.</p>
 
         
-          <div class='highlight'><pre><span class="hljs-keyword">const</span> AI = {};</pre></div>
+          <div class='highlight'><pre>
+<span class="hljs-keyword">const</span> AI = {};</pre></div>
         
       
         
@@ -678,7 +678,19 @@ it can play our game against itself.</p>
   }
 
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${winner}</span> wins!`</span>);
-}());</code></pre>
+}());</code></pre><p>It looks like our AI works, but we won’t really know until we play a game
+against it. Let’s combine our board, rules, and AI into something that can
+drive our renderer.</p>
+<hr>
+
+        
+      
+        
+        <p>Let’s write a game engine.</p>
+<p>A fixed unit of time in video games is often called a tick. With every tick
+the game state changes, and board needs to be rendered. For our game, a move
+by the player and response from the AI is a tick.</p>
+
         
           <div class='highlight'><pre>
 <span class="hljs-keyword">const</span> Engine = {};
@@ -703,8 +715,23 @@ Engine.tick = <span class="hljs-function">(<span class="hljs-params">board, play
   <span class="hljs-keyword">const</span> pickable = Rules.pickable(board, player);
   <span class="hljs-keyword">const</span> picked = [end, start].filter(<span class="hljs-function"><span class="hljs-params">space</span> =&gt;</span> pickable.indexOf(space) &gt; <span class="hljs-number">-1</span>);
   <span class="hljs-keyword">return</span> [Board.clone(board), ...picked];
-};
+};</pre></div>
+        
+      
+        
+        <p>The <code>Engine.tick</code> function takes a board, a player, and a move. It returns
+a board and a picked piece. That response matches the input to the
+<code>Renderer.render</code> function, so we can draw the board with every tick.</p>
+<p>If either the player or AI has won, we return the board unchanged with
+nothing picked.</p>
+<p>If the player is allowed to make their move, they take it. If the player
+didn’t make a winning move, the AI gets a turn. Either way, we return the
+updated board with nothing picked.</p>
+<p>If the player tried to make an illegal move, we return the board unchanged.
+But we also need to figure out what space to leave picked.</p>
 
+        
+          <div class='highlight'><pre>
 (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> board = Board.create();
   <span class="hljs-keyword">let</span> input = [];

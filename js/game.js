@@ -70,7 +70,7 @@ const Board = {};
 // }
 // </style>
 //
-// When talking about board games, it's useful to be able to describe both the
+// When talking about board games, it's useful to be able to describe the
 // players and the moves they make in shorthand. Chess notation used numbers for
 // ranks (rows) and letters for files (columns). So we can draw a 3 x 3 board
 // like this:
@@ -170,9 +170,8 @@ Board.create = () => {
 };
 
 // The `Board.create` function returns everything we need to draw a picture of
-// the game. The board shouldn't know or care how it's rendered. For all it
-// knows, we could be playing this game on a terminal and drawing it out in
-// ASCII text.
+// the game. The board shouldn't care how it's rendered. For all it knows, we
+// could be playing this game on a terminal and drawing it with ASCII text.
 //
 // Now that we can draw the board, we need a way to move pieces around it. If X
 // starts by moving from a1 to c4, we can write that as "a1-c4". If Y responds
@@ -584,6 +583,7 @@ Rules.winner = (board) => {
 // ---
 //
 // Let's write an AI.
+
 const AI = {};
 
 // Our AI can use the rules to find all the winning moves available to it.
@@ -671,6 +671,18 @@ AI.move = (board, player) => {
 //   console.log(`${winner} wins!`);
 // }());
 // ```
+//
+// It looks like our AI works, but we won't really know until we play a game
+// against it. Let's combine our board, rules, and AI into something that can
+// drive our renderer.
+//
+// ---
+//
+// Let's write a game engine.
+//
+// A fixed unit of time in video games is often called a tick. With every tick
+// the game state changes, and board needs to be rendered. For our game, a move
+// by the player and response from the AI is a tick.
 
 const Engine = {};
 
@@ -695,6 +707,20 @@ Engine.tick = (board, player, start, end) => {
   const picked = [end, start].filter(space => pickable.indexOf(space) > -1);
   return [Board.clone(board), ...picked];
 };
+
+// The `Engine.tick` function takes a board, a player, and a move. It returns
+// a board and a picked piece. That response matches the input to the
+// `Renderer.render` function, so we can draw the board with every tick.
+//
+// If either the player or AI has won, we return the board unchanged with
+// nothing picked.
+//
+// If the player is allowed to make their move, they take it. If the player
+// didn't make a winning move, the AI gets a turn. Either way, we return the
+// updated board with nothing picked.
+//
+// If the player tried to make an illegal move, we return the board unchanged.
+// But we also need to figure out what space to leave picked.
 
 (function game() {
   let board = Board.create();
