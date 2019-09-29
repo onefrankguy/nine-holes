@@ -682,14 +682,19 @@ drive our renderer.</p>
       
         
         <p>Let’s write a game engine.</p>
-<p>A fixed unit of time in video games is often called a tick. With every tick
-the game state changes, and board needs to be rendered. For our game, a move
-by the player and response from the AI is a tick.</p>
 
         
           <div class='highlight'><pre>
-<span class="hljs-keyword">const</span> Engine = {};
+<span class="hljs-keyword">const</span> Engine = {};</pre></div>
+        
+      
+        
+        <p>A fixed unit of time in video games is often called a tick. With every tick
+the game state changes, and the board needs to be rendered. For our game, a
+move by the player and response from the AI is a tick.</p>
 
+        
+          <div class='highlight'><pre>
 Engine.tick = <span class="hljs-function">(<span class="hljs-params">board, player, start, end</span>) =&gt;</span> {
   <span class="hljs-keyword">if</span> (Rules.winner(board)) {
     <span class="hljs-keyword">return</span> [Board.clone(board), <span class="hljs-literal">undefined</span>];
@@ -723,8 +728,29 @@ nothing picked.</p>
 didn’t make a winning move, the AI gets a turn. Either way, we return the
 updated board with nothing picked.</p>
 <p>If the player tried to make an illegal move, we return the board unchanged.
-But we also need to figure out what space to leave picked.</p>
+But we also need to figure out what space to leave picked. We know the player
+picked <code>start</code> and then picked <code>end</code>, so we return the <em>last</em> valid space
+they chose. This lets the player pick a piece and then change their mind and
+pick a differnt piece.</p>
+<p>Let’s write a test to check illegal moves.</p>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testIllegalMoves</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> board = Board.create();
+  <span class="hljs-keyword">const</span> ai = <span class="hljs-string">'a5'</span>;
+  <span class="hljs-keyword">const</span> empty = <span class="hljs-string">'a2'</span>;
+  <span class="hljs-keyword">const</span> player1 = <span class="hljs-string">'a1'</span>;
+  <span class="hljs-keyword">const</span> player2 = <span class="hljs-string">'b1'</span>;
 
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, ai, ai)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, ai, empty)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, ai, player1)[<span class="hljs-number">1</span>] === player1);
+
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, empty, ai)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, empty, empty)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, empty, player1)[<span class="hljs-number">1</span>] === player1);
+
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, player1, ai)[<span class="hljs-number">1</span>] === player1);
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, player1, player2)[<span class="hljs-number">1</span>] === player2);
+}());</code></pre>
         
           <div class='highlight'><pre>
 (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
@@ -770,7 +796,9 @@ But we also need to figure out what space to leave picked.</p>
     Renderer.invalidate(board, picked);
   }
 
-  <span class="hljs-built_in">window</span>.onload = play;
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> !== <span class="hljs-string">'undefined'</span>) {
+    <span class="hljs-built_in">window</span>.onload = play;
+  }
 }());</pre></div>
         
       
@@ -862,7 +890,9 @@ But we also need to figure out what space to leave picked.</p>
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fn(selector);
   }
 
-  <span class="hljs-built_in">window</span>.jQuery = root;
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> !== <span class="hljs-string">'undefined'</span>) {
+    <span class="hljs-built_in">window</span>.jQuery = root;
+  }
 }());</pre></div>
         
       

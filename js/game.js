@@ -674,12 +674,12 @@ AI.move = (board, player) => {
 // ---
 //
 // Let's write a game engine.
-//
-// A fixed unit of time in video games is often called a tick. With every tick
-// the game state changes, and board needs to be rendered. For our game, a move
-// by the player and response from the AI is a tick.
 
 const Engine = {};
+
+// A fixed unit of time in video games is often called a tick. With every tick
+// the game state changes, and the board needs to be rendered. For our game, a
+// move by the player and response from the AI is a tick.
 
 Engine.tick = (board, player, start, end) => {
   if (Rules.winner(board)) {
@@ -715,7 +715,33 @@ Engine.tick = (board, player, start, end) => {
 // updated board with nothing picked.
 //
 // If the player tried to make an illegal move, we return the board unchanged.
-// But we also need to figure out what space to leave picked.
+// But we also need to figure out what space to leave picked. We know the player
+// picked `start` and then picked `end`, so we return the _last_ valid space
+// they chose. This lets the player pick a piece and then change their mind and
+// pick a differnt piece.
+//
+// Let's write a test to check illegal moves.
+//
+// ```
+// (function testIllegalMoves() {
+//   const board = Board.create();
+//   const ai = 'a5';
+//   const empty = 'a2';
+//   const player1 = 'a1';
+//   const player2 = 'b1';
+//
+//   assert(Engine.tick(board, 'x', ai, ai)[1] === undefined);
+//   assert(Engine.tick(board, 'x', ai, empty)[1] === undefined);
+//   assert(Engine.tick(board, 'x', ai, player1)[1] === player1);
+//
+//   assert(Engine.tick(board, 'x', empty, ai)[1] === undefined);
+//   assert(Engine.tick(board, 'x', empty, empty)[1] === undefined);
+//   assert(Engine.tick(board, 'x', empty, player1)[1] === player1);
+//
+//   assert(Engine.tick(board, 'x', player1, ai)[1] === player1);
+//   assert(Engine.tick(board, 'x', player1, player2)[1] === player2);
+// }());
+// ```
 
 (function game() {
   let board = Board.create();
@@ -760,7 +786,9 @@ Engine.tick = (board, player, start, end) => {
     Renderer.invalidate(board, picked);
   }
 
-  window.onload = play;
+  if (typeof window !== 'undefined') {
+    window.onload = play;
+  }
 }());
 
 // <h2 id="appendix">Appendix: A Tiny jQuery Clone</h2>
@@ -848,5 +876,7 @@ Engine.tick = (board, player, start, end) => {
     return new Fn(selector);
   }
 
-  window.jQuery = root;
+  if (typeof window !== 'undefined') {
+    window.jQuery = root;
+  }
 }());
