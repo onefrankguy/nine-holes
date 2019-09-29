@@ -7,8 +7,13 @@
 //
 // This is that game.
 //
+// If you'd like to play the game before reading about it, you can do that at
+// [frankmitchell.org/nine-holes][fm]. It'll run on most phone and desktop
+// browsers.
+//
 //
 // [Prolix]: https://prolix-app.com/ "Prolix is a word search game for the iPhone and iPod touch which lets you tweet your scores so your friends can play with you."
+// [fm]: https://www.frankmitchell.org/nine-holes "Frank Mitchell: Nine Holes"
 //
 // ---
 //
@@ -832,12 +837,27 @@ Engine.tick = (board, player, start, end) => {
 // using an [IIFE][] (Immediately Invoked Function Expression) to avoid
 // exposing that state to the outside world.
 //
+//
 // [IIFE]: https://developer.mozilla.org/en-US/docs/Glossary/IIFE "Various (MDN): IIFE"
 }());
 
 // And that's how you make a video game.
+//
+// You can find all the source code for **Nine Holes** on [GitHub][gh] under a
+// MIT license. Please take it, and change it, and make it your own. The world
+// needs more video games.
+//
+//
+// [gh]: https://github.com/onefrankguy/nine-holes "Frank Mitchell (GitHub): Nine Holes"
 
 // <h2 id="appendix">Appendix: A Tiny jQuery Clone</h2>
+//
+// I've written a lot of video games for [js13kGames][], a video game competition
+// that doesn't allow external libraries. So this is a tiny jQuery clone that
+// does just enough to make **Nine Holes** work.
+//
+//
+// [js13kGames]: https://js13kgames.com/ "Andrzej Mazur (js13kGames): HTML5 and JavaScript game development competition in just 13 kB"
 
 (function $() {
   function Fn(selector) {
@@ -924,3 +944,11 @@ Engine.tick = (board, player, start, end) => {
 
   window.jQuery = root;
 }());
+
+// Design <abbr title="and">&amp;</abbr> dev by [Frank Mitchell][]. Styled with
+// [Docco][]. [CC BY 4.0][cc4]
+//
+//
+// [Frank Mitchell]: https://www.frankmitchell.org/ "retrofuturist decker and ice cream pigggy"
+// [Docco]: https://ashkenas.com/docco/ "Jeremy Ashkenas: Docco is a quick-and-dirty documentation generator."
+// [cc4]: https://creativecommons.org/licenses/by/4.0/ "Creative Commons Attribution 4.0 International"
