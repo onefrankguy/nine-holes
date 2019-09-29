@@ -731,40 +731,76 @@ updated board with nothing picked.</p>
 But we also need to figure out what space to leave picked. We know the player
 picked <code>start</code> and then picked <code>end</code>, so we return the <em>last</em> valid space
 they chose. This lets the player pick a piece and then change their mind and
-pick a differnt piece.</p>
+pick a different piece.</p>
 <p>Let’s write a test to check illegal moves.</p>
 <pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testIllegalMoves</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> board = Board.create();
-  <span class="hljs-keyword">const</span> ai = <span class="hljs-string">'a5'</span>;
   <span class="hljs-keyword">const</span> empty = <span class="hljs-string">'a2'</span>;
+  <span class="hljs-keyword">const</span> ai = <span class="hljs-string">'a5'</span>;
   <span class="hljs-keyword">const</span> player1 = <span class="hljs-string">'a1'</span>;
   <span class="hljs-keyword">const</span> player2 = <span class="hljs-string">'b1'</span>;
 
-  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, ai, ai)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
   assert(Engine.tick(board, <span class="hljs-string">'x'</span>, ai, empty)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, ai, ai)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
   assert(Engine.tick(board, <span class="hljs-string">'x'</span>, ai, player1)[<span class="hljs-number">1</span>] === player1);
 
-  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, empty, ai)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
   assert(Engine.tick(board, <span class="hljs-string">'x'</span>, empty, empty)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
+  assert(Engine.tick(board, <span class="hljs-string">'x'</span>, empty, ai)[<span class="hljs-number">1</span>] === <span class="hljs-literal">undefined</span>);
   assert(Engine.tick(board, <span class="hljs-string">'x'</span>, empty, player1)[<span class="hljs-number">1</span>] === player1);
 
+  <span class="hljs-comment">// `player1` to `empty` is a valid move, so we don't need to test it.</span>
   assert(Engine.tick(board, <span class="hljs-string">'x'</span>, player1, ai)[<span class="hljs-number">1</span>] === player1);
   assert(Engine.tick(board, <span class="hljs-string">'x'</span>, player1, player2)[<span class="hljs-number">1</span>] === player2);
-}());</code></pre>
-        
-          <div class='highlight'><pre>
-(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{
+}());</code></pre><p>Because our engine is stateless, we can use the AI to play our game against
+the engine. With each tick, the board updates with moves from both players.</p>
+<pre><code>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testEngine</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">let</span> board = Board.create();
-  <span class="hljs-keyword">let</span> input = [];
-  <span class="hljs-keyword">let</span> picked;
+  <span class="hljs-keyword">let</span> winner;
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
-    board = Board.create();
-    input = [];
-    picked = <span class="hljs-literal">undefined</span>;
+  <span class="hljs-keyword">while</span> (!winner) {
+    <span class="hljs-keyword">const</span> xmove = AI.move(board, <span class="hljs-string">'x'</span>);
+    [board] = Engine.tick(board, <span class="hljs-string">'x'</span>, ...xmove.split(<span class="hljs-string">'-'</span>));
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`x plays <span class="hljs-subst">${xmove}</span> resulting in`</span>, <span class="hljs-built_in">JSON</span>.stringify(board.layout));
+
+    winner = Rules.winner(board);
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBoard</span>(<span class="hljs-params">element</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${winner}</span> wins!`</span>);
+}());</code></pre><p>It looks like our engine works. Let’s wire it up to our renderer so we can
+play against the AI.</p>
+<hr>
+
+        
+      
+        
+        <p>Let’s write a game.</p>
+
+        
+          <div class='highlight'><pre>
+(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">game</span>(<span class="hljs-params"></span>) </span>{</pre></div>
+        
+      
+        
+        <p>Our game keeps track of three things. There’s a <code>board</code> for the game state,
+an <code>input</code> list of spaces on the board the player has selected, and a <code>picked</code>
+space that tracks the currently selected space.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">let</span> board = Board.create();
+  <span class="hljs-keyword">let</span> input = [];
+  <span class="hljs-keyword">let</span> picked;</pre></div>
+        
+      
+        
+        <p>When the player selects a space we add the <code>picked</code> class to it, add the
+selected space to the <code>input</code> list, tick the game engine, and render the
+board. If this was a real time video game, we’d run that same loop (respond
+to player input, tick the game engine, render the world) forever. Since
+this is a turn based game, we only need to run it when the player does
+something.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBoard</span>(<span class="hljs-params">element</span>) </span>{
     element.addClass(<span class="hljs-string">'picked'</span>);
   }
 
@@ -773,6 +809,18 @@ pick a differnt piece.</p>
     [board, picked] = Engine.tick(board, <span class="hljs-string">'x'</span>, ...input);
     input = picked ? [picked] : [];
     Renderer.invalidate(board, picked);
+  }</pre></div>
+        
+      
+        
+        <p>We also include a reset button that clears everything out and starts the
+game over.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reset</span>(<span class="hljs-params"></span>) </span>{
+    board = Board.create();
+    input = [];
+    picked = <span class="hljs-literal">undefined</span>;
   }
 
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onReset</span>(<span class="hljs-params">element</span>) </span>{
@@ -783,23 +831,39 @@ pick a differnt piece.</p>
     element.removeClass(<span class="hljs-string">'picked'</span>);
     reset();
     Renderer.invalidate(board, picked);
-  }
+  }</pre></div>
+        
+      
+        
+        <p>Finally, we wire up click handlers for the board spaces and the reset
+button. Then we initialize the game and render the starting board.</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
+        
+          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">play</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">const</span> $ = <span class="hljs-built_in">window</span>.jQuery;
 
     $(<span class="hljs-string">'#reset'</span>).click(onReset, offReset);
-
     <span class="hljs-built_in">Object</span>.keys(board.layout).forEach(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> $(<span class="hljs-string">`#<span class="hljs-subst">${id}</span>`</span>).click(onBoard, offBoard));
 
     reset();
     Renderer.invalidate(board, picked);
   }
 
-  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> !== <span class="hljs-string">'undefined'</span>) {
-    <span class="hljs-built_in">window</span>.onload = play;
-  }
-}());</pre></div>
+  <span class="hljs-built_in">window</span>.onload = play;</pre></div>
+        
+      
+        
+        <p>Because our game has state, it’s not just pure functions any more, we’re
+using an <a href="https://developer.mozilla.org/en-US/docs/Glossary/IIFE" title="Various (MDN): IIFE">IIFE</a> (Immediately Invoked Function Expression) to avoid
+exposing that state to the outside world.</p>
+
+        
+          <div class='highlight'><pre>}());</pre></div>
+        
+      
+        
+        <p>And that’s how you make a video game.</p>
+
         
       
         
@@ -890,9 +954,7 @@ pick a differnt piece.</p>
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Fn(selector);
   }
 
-  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span> !== <span class="hljs-string">'undefined'</span>) {
-    <span class="hljs-built_in">window</span>.jQuery = root;
-  }
+  <span class="hljs-built_in">window</span>.jQuery = root;
 }());</pre></div>
         
       

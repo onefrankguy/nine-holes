@@ -718,42 +718,73 @@ Engine.tick = (board, player, start, end) => {
 // But we also need to figure out what space to leave picked. We know the player
 // picked `start` and then picked `end`, so we return the _last_ valid space
 // they chose. This lets the player pick a piece and then change their mind and
-// pick a differnt piece.
+// pick a different piece.
 //
 // Let's write a test to check illegal moves.
 //
 // ```
 // (function testIllegalMoves() {
 //   const board = Board.create();
-//   const ai = 'a5';
 //   const empty = 'a2';
+//   const ai = 'a5';
 //   const player1 = 'a1';
 //   const player2 = 'b1';
 //
-//   assert(Engine.tick(board, 'x', ai, ai)[1] === undefined);
 //   assert(Engine.tick(board, 'x', ai, empty)[1] === undefined);
+//   assert(Engine.tick(board, 'x', ai, ai)[1] === undefined);
 //   assert(Engine.tick(board, 'x', ai, player1)[1] === player1);
 //
-//   assert(Engine.tick(board, 'x', empty, ai)[1] === undefined);
 //   assert(Engine.tick(board, 'x', empty, empty)[1] === undefined);
+//   assert(Engine.tick(board, 'x', empty, ai)[1] === undefined);
 //   assert(Engine.tick(board, 'x', empty, player1)[1] === player1);
 //
+//   // `player1` to `empty` is a valid move, so we don't need to test it.
 //   assert(Engine.tick(board, 'x', player1, ai)[1] === player1);
 //   assert(Engine.tick(board, 'x', player1, player2)[1] === player2);
 // }());
 // ```
+//
+// Because our engine is stateless, we can use the AI to play our game against
+// the engine. With each tick, the board updates with moves from both players.
+//
+// ```
+// (function testEngine() {
+//   let board = Board.create();
+//   let winner;
+//
+//   while (!winner) {
+//     const xmove = AI.move(board, 'x');
+//     [board] = Engine.tick(board, 'x', ...xmove.split('-'));
+//     console.log(`x plays ${xmove} resulting in`, JSON.stringify(board.layout));
+//
+//     winner = Rules.winner(board);
+//   }
+//
+//   console.log(`${winner} wins!`);
+// }());
+// ```
+//
+// It looks like our engine works. Let's wire it up to our renderer so we can
+// play against the AI.
+//
+// ---
+//
+// Let's write a game.
 
 (function game() {
+  // Our game keeps track of three things. There's a `board` for the game state,
+  // an `input` list of spaces on the board the player has selected, and a `picked`
+  // space that tracks the currently selected space.
   let board = Board.create();
   let input = [];
   let picked;
 
-  function reset() {
-    board = Board.create();
-    input = [];
-    picked = undefined;
-  }
-
+  // When the player selects a space we add the `picked` class to it, add the
+  // selected space to the `input` list, tick the game engine, and render the
+  // board. If this was a real time video game, we'd run that same loop (respond
+  // to player input, tick the game engine, render the world) forever. Since
+  // this is a turn based game, we only need to run it when the player does
+  // something.
   function onBoard(element) {
     element.addClass('picked');
   }
@@ -763,6 +794,14 @@ Engine.tick = (board, player, start, end) => {
     [board, picked] = Engine.tick(board, 'x', ...input);
     input = picked ? [picked] : [];
     Renderer.invalidate(board, picked);
+  }
+
+  // We also include a reset button that clears everything out and starts the
+  // game over.
+  function reset() {
+    board = Board.create();
+    input = [];
+    picked = undefined;
   }
 
   function onReset(element) {
@@ -775,21 +814,28 @@ Engine.tick = (board, player, start, end) => {
     Renderer.invalidate(board, picked);
   }
 
+  // Finally, we wire up click handlers for the board spaces and the reset
+  // button. Then we initialize the game and render the starting board.
   function play() {
     const $ = window.jQuery;
 
     $('#reset').click(onReset, offReset);
-
     Object.keys(board.layout).forEach(id => $(`#${id}`).click(onBoard, offBoard));
 
     reset();
     Renderer.invalidate(board, picked);
   }
 
-  if (typeof window !== 'undefined') {
-    window.onload = play;
-  }
+  window.onload = play;
+
+// Because our game has state, it's not just pure functions any more, we're
+// using an [IIFE][] (Immediately Invoked Function Expression) to avoid
+// exposing that state to the outside world.
+//
+// [IIFE]: https://developer.mozilla.org/en-US/docs/Glossary/IIFE "Various (MDN): IIFE"
 }());
+
+// And that's how you make a video game.
 
 // <h2 id="appendix">Appendix: A Tiny jQuery Clone</h2>
 
@@ -876,7 +922,5 @@ Engine.tick = (board, player, start, end) => {
     return new Fn(selector);
   }
 
-  if (typeof window !== 'undefined') {
-    window.jQuery = root;
-  }
+  window.jQuery = root;
 }());
